@@ -1,0 +1,27 @@
+-
+  time: "2025-08-21T07:28:12.539570Z"
+  spanId: "0443cfced516c805"
+  traceId: "389df17adcde933e7235de6d5e1a8c02"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 5
+  component: "io.opentelemetry.spring-kafka-2.7"
+  systemType: "kafka"
+  actionName: "process"
+  targetName: "test-topic"
+  remoteAddr: ""
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 3872
+  cnt: 1
+  error: 0

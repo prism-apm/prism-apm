@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data Mock</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            padding: 48px 24px;
+            color: #e2e8f0;
+        }
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(4px);
+        }
+        .card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+        .control-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 220px;
+        }
+        input[type="date"] {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 14px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: #e2e8f0;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="date"]:focus {
+            border-color: #3b82f6;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.7);
+            cursor: pointer;
+        }
+        .date-range span {
+            color: #64748b;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        button {
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        button:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: #fff;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+        }
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 8px;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .progress-label {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        #result {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 16px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 data-i18n="dataPageTitle">Data Mock</h1>
+        <p class="subtitle" data-i18n="dataSubtitle">Generate demo data or clear existing data</p>
+
+        <div class="card">
+            <div class="card-title" data-i18n="clearTitle">Clear Data</div>
+            <div class="control-row">
+                <button id="clearBtn" class="btn-danger" data-i18n="clearBtn">Clear Data</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title" data-i18n="genTitle">Generate Mock Data</div>
+            <div class="control-row">
+                <div class="date-range">
+                    <input type="date" id="startDateInput">
+                    <span data-i18n="dateRangeSep">to</span>
+                    <input type="date" id="endDateInput">
+                </div>
+                <button id="genBtn" class="btn-primary" data-i18n="genBtn">Generate</button>
+            </div>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-label" id="progressLabel" data-i18n="progressStarting">Preparing...</div>
+        </div>
+
+        <div id="result" style="display:none"></div>
+    </div>
+
+    <script>
+        let pollTimer = null;
+
+        (function() {
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById('startDateInput').value = today;
+            document.getElementById('endDateInput').value = today;
+        })();
+
+        (function() {
+            fetch('/prism-explorer/api/mock/status')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.initDone) {
+                        document.getElementById('genBtn').disabled = true;
+                        document.getElementById('genBtn').setAttribute('data-i18n-title', 'initWaiting');
+                        window.__applyI18n();
+                    }
+                });
+        })();
+
+        function startTask(type, params) {
+            const container = document.getElementById('progressContainer');
+            const fill = document.getElementById('progressFill');
+            const label = document.getElementById('progressLabel');
+            const result = document.getElementById('result');
+
+            document.querySelectorAll('button').forEach(b => b.disabled = true);
+            result.textContent = '';
+            result.style.display = 'none';
+            container.style.display = 'block';
+            fill.style.width = '0%';
+            label.textContent = window.__('starting');
+
+            const url = type === 'clear' ? '/prism-explorer/api/mock/clear' : '/prism-explorer/api/mock/data?' + params.toString();
+
+            fetch(url, { method: 'POST' })
+                .then(r => r.json())
+                .then(genData => {
+                    const taskId = genData.taskId;
+
+                    if (genData.done) {
+                        document.querySelectorAll('button').forEach(b => b.disabled = false);
+                        container.style.display = 'none';
+                        result.textContent = genData.messageIsLong ? genData.message : (genData.message ? window.__t(genData.message) : JSON.stringify(genData, null, 2));
+                        result.style.display = '';
+                        return;
+                    }
+
+                    pollTimer = setInterval(async () => {
+                        try {
+                            const res = await fetch('/prism-explorer/api/mock/progress?taskId=' + encodeURIComponent(taskId));
+                            const data = await res.json();
+
+                            const totalScripts = data.totalScripts || 1;
+                            const scriptIdx = Math.min(data.currentScriptIndex || 0, totalScripts);
+                            const pct = Math.min(Math.round((scriptIdx / totalScripts) * 100), 100);
+
+                            fill.style.width = pct + '%';
+                            label.textContent = window.__t(data.message || '');
+
+                            if (data.done) {
+                                clearInterval(pollTimer);
+                                pollTimer = null;
+                                document.querySelectorAll('button').forEach(b => b.disabled = false);
+                                container.style.display = 'none';
+                                label.textContent = '';
+                                result.textContent = data.messageIsLong ? data.message : (data.message ? window.__t(data.message) : JSON.stringify(data, null, 2));
+                                result.style.display = '';
+                            }
+                        } catch (e) {
+                            clearInterval(pollTimer);
+                            pollTimer = null;
+                            document.querySelectorAll('button').forEach(b => b.disabled = false);
+                            result.textContent = window.__('pollFailed') + e.message;
+                            result.style.display = '';
+                        }
+                    }, 300);
+                })
+                .catch(e => {
+                    document.querySelectorAll('button').forEach(b => b.disabled = false);
+                    result.textContent = window.__('requestFailed') + e.message;
+                    result.style.display = '';
+                });
+        }
+
+        document.getElementById('genBtn').addEventListener('click', () => {
+            const startDate = document.getElementById('startDateInput').value;
+            const endDate = document.getElementById('endDateInput').value;
+            const params = new URLSearchParams();
+            if (startDate) params.set('startDate', startDate);
+            if (endDate) params.set('endDate', endDate);
+            startTask('data', params);
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            if (!confirm(window.__('clearConfirm'))) return;
+            startTask('clear', new URLSearchParams());
+        });
+    </script>
+    <script src="i18n.js"></script>
+</body>
+</html>

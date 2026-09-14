@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.prism.apm.parser.repository.ResourceHashDictionaryMapper">
+
+    <insert id="batchUpsert" parameterType="java.util.List">
+        INSERT INTO resource_hash_dictionary
+        (hash_key, category, algorithm, text_value, create_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.hashKey,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+            #{item.category,jdbcType=VARCHAR},
+            #{item.algorithm,jdbcType=VARCHAR},
+            #{item.textValue,jdbcType=VARCHAR},
+            #{item.createTime,jdbcType=TIMESTAMP})
+        </foreach>
+        ON CONFLICT (hash_key, category) DO NOTHING
+    </insert>
+
+    <resultMap id="BaseResultMap" type="org.prism.apm.parser.model.entity.ResourceHashDictionaryEntity">
+        <result column="hash_key" jdbcType="OTHER" property="hashKey" typeHandler="org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler" />
+        <result column="category" jdbcType="VARCHAR" property="category" />
+        <result column="algorithm" jdbcType="VARCHAR" property="algorithm" />
+        <result column="text_value" jdbcType="VARCHAR" property="textValue" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    </resultMap>
+
+    <select id="selectByHashKeyAndCategory" resultMap="BaseResultMap">
+        SELECT hash_key, category, algorithm, text_value, create_time
+        FROM resource_hash_dictionary
+        WHERE hash_key = #{hashKey,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler}
+          AND category = #{category,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

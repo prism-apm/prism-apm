@@ -1,0 +1,31 @@
+version: 1.0-test
+parser:
+  componentDefinitions:
+    - name: "full-component"
+      match:
+        - span-attributes__db.system: ".*"
+      outputs:
+        serviceName:
+          vals:
+            - "resource-attributes__service.name"
+        hostName:
+          vals:
+            - "resource-attributes__host.name"
+        spanKind:
+          vals:
+            - "span__kind"
+        actionName:
+          vals:
+            - "span-attributes__db.operation"
+        targetName:
+          vals:
+            - "span-attributes__db.query.text"
+        component:
+          vals:
+            - "spans-scope__name"
+        systemType:
+          vals:
+            - "span-attributes__db.system"
+        error:
+          vals:
+            - "spans__status__code"

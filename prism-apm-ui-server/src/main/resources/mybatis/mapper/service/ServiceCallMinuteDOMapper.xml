@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.prism.apm.ui.server.mapper.service.ServiceCallMinuteDOMapper">
+
+
+    <!--suppress SqlType, SqlShouldBeInGroupBy -->
+    <select id="queryServiceSummaryByServiceName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+            service_name as serviceName,
+            ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration,
+            sum(cnt) as totalCount,
+            sum(error_num) as totalError
+        from ${routeInfo.dynamicTableName}
+        where
+            service_name = #{param.serviceName}
+            and span_kind = 2
+            <![CDATA[
+          AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+            ]]>
+        group by service_name
+    </select>
+
+    <select id="queryServiceDetailByServiceName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+            time_bucket('${param.strInterval}', time) AT TIME ZONE #{dateParam.timezone} as timeb,
+            ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration,
+            sum(cnt) as totalCount,
+            sum(error_num) as totalError
+        from ${routeInfo.dynamicTableName}
+        where
+            service_name = #{param.serviceName}
+            and span_kind = 2
+            <if test="param.hostName != null and param.hostName != ''">
+                and host_name = #{param.hostName}
+            </if>
+        <![CDATA[
+            AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+            ]]>
+        group by timeb
+        order by timeb
+    </select>
+
+    <select id="queryTargetSummaryByServiceName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+            target_name as targetName,
+            ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration,
+            ROUND(max(max_duration), 2) as max,
+            ROUND(min(min_duration), 2) as min,
+            sum(cnt) as totalCount,
+            sum(error_num) as totalError,
+            approx_percentile(0.90, rollup(percent_duration)) AS p90,
+            approx_percentile(0.95, rollup(percent_duration)) AS p95,
+            approx_percentile(0.99, rollup(percent_duration)) AS p99
+        from ${routeInfo.dynamicTableName}
+        where
+            service_name = #{param.serviceName}
+            and span_kind = 2
+            <if test="param.hostName != null and param.hostName != ''">
+                and host_name = #{param.hostName}
+            </if>
+        <![CDATA[
+            AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+            ]]>
+        group by target_name
+    </select>
+
+    <!--suppress SqlRedundantOrderingDirection -->
+    <select id="queryTargetDetailByTargetName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+            time_bucket('${param.strInterval}', time) AT TIME ZONE #{dateParam.timezone} as timeb,
+            ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration,
+            sum(cnt) as totalCount,
+            sum(error_num) as totalError
+        from ${routeInfo.dynamicTableName}
+        where
+            service_name = #{param.serviceName}
+            and span_kind = 2
+            and target_name = #{param.targetNameHashKey}::uuid
+            <if test="param.hostName != null and param.hostName != ''">
+                and host_name = #{param.hostName}
+            </if>
+        <![CDATA[
+            AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+            ]]>
+        group by timeb
+        order by timeb
+    </select>
+
+    <select id="queryInnerActionDetailByActionName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+        time_bucket('${param.strInterval}', time) AT TIME ZONE #{dateParam.timezone} as timeb,
+        action_name as actionName,
+        system_type as systemType,
+        ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration
+        from ${routeInfo.dynamicTableName}
+        where
+        caller_service_name = #{param.serviceName}
+        and caller_span_kind = 2
+        and span_kind = 3
+        and caller_target_name = #{param.targetNameHashKey}::uuid
+        <if test="param.hostName != null and param.hostName != ''">
+            and host_name = #{param.hostName}
+        </if>
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        group by action_name, timeb, systemType
+        order by timeb
+    </select>
+    <select id="queryInnerTargetDetailByTargetName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+        time_bucket('${param.strInterval}', time) AT TIME ZONE #{dateParam.timezone} as timeb,
+        target_name as targetName,
+        system_type as systemType,
+        ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration
+        from ${routeInfo.dynamicTableName}
+        where
+        caller_service_name = #{param.serviceName}
+        and caller_span_kind = 2
+        and span_kind = 3
+        and caller_target_name = #{param.targetNameHashKey}::uuid
+        <if test="param.hostName != null and param.hostName != ''">
+            and host_name = #{param.hostName}
+        </if>
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        group by target_name, timeb, systemType
+        order by timeb
+    </select>
+
+    <select id="countAndSumInnerDetailByActionName" resultType="org.prism.apm.ui.server.entity.dto.service.InnerCallStatsDTO">
+        SELECT
+            COUNT(*) as totalRows,
+            COALESCE(SUM(total_time), 0) as totalDurationSum
+        FROM (
+            SELECT
+                system_type,
+                action_name,
+                SUM(avg_duration * cnt) as total_time
+            FROM ${routeInfo.dynamicTableName}
+            WHERE
+                caller_service_name = #{param.serviceName}
+                AND caller_span_kind = 2
+                AND span_kind = 3
+                AND caller_target_name = #{param.targetNameHashKey}::uuid
+                <if test="param.hostName != null and param.hostName != ''">
+                    AND host_name = #{param.hostName}
+                </if>
+                <![CDATA[
+                AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+                ]]>
+            GROUP BY system_type, action_name
+        ) AS subquery
+    </select>
+
+    <select id="queryInnerDetailByActionName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+            action_name as actionName,
+            system_type as SystemType,
+            sum(cnt) as totalCount,
+            ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration
+        from ${routeInfo.dynamicTableName}
+        where
+            caller_service_name = #{param.serviceName}
+            and caller_span_kind = 2
+            and span_kind = 3
+            and caller_target_name = #{param.targetNameHashKey}::uuid
+            <if test="param.hostName != null and param.hostName != ''">
+                and host_name = #{param.hostName}
+            </if>
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        group by system_type, action_name
+        ORDER BY SUM(avg_duration * cnt) DESC
+        LIMIT #{pageParam.pageSize} OFFSET #{pageParam.pageOffset}
+    </select>
+
+    <select id="countAndSumInnerDetailByTargetName" resultType="org.prism.apm.ui.server.entity.dto.service.InnerCallStatsDTO">
+        SELECT
+            COUNT(*) as totalRows,
+            COALESCE(SUM(total_time), 0) as totalDurationSum
+        FROM (
+            SELECT
+                system_type,
+                target_name,
+                SUM(avg_duration * cnt) as total_time
+            FROM ${routeInfo.dynamicTableName}
+            WHERE
+                caller_service_name = #{param.serviceName}
+                AND caller_span_kind = 2
+                AND span_kind = 3
+                AND caller_target_name = #{param.targetNameHashKey}::uuid
+                <if test="param.hostName != null and param.hostName != ''">
+                    AND host_name = #{param.hostName}
+                </if>
+                <![CDATA[
+                AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+                ]]>
+            GROUP BY system_type, target_name
+        ) AS subquery
+    </select>
+
+    <select id="queryInnerDetailByTargetName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        SELECT
+            target_name AS targetName,
+            system_type AS SystemType,
+            SUM(cnt) AS totalCount,
+            SUM(avg_duration * cnt) / SUM(cnt) AS avgDuration
+        FROM ${routeInfo.dynamicTableName}
+        WHERE
+            caller_service_name = #{param.serviceName}
+            and caller_span_kind = 2
+            and span_kind = 3
+            and caller_target_name = #{param.targetNameHashKey}::uuid
+            <if test="param.hostName != null and param.hostName != ''">
+                and host_name = #{param.hostName}
+            </if>
+        <![CDATA[
+            AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+            ]]>
+        GROUP BY
+            system_type,
+            target_name
+        ORDER BY SUM(avg_duration * cnt) DESC
+        LIMIT #{pageParam.pageSize} OFFSET #{pageParam.pageOffset}
+    </select>
+
+    <select id="queryServiceIfaceWhoCallMe" parameterType="org.prism.apm.ui.server.entity.param.service.WhoCallMeQueryParam" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        SELECT
+            caller_service_name as callerServiceName,
+            caller_target_name as callerTargetName,
+            SUM ( avg_duration * cnt ) AS totalTime,
+            SUM ( cnt ) AS totalCount ,
+            ROUND( SUM ( avg_duration * cnt )/SUM ( cnt ), 2) as avgDuration
+        FROM
+        ${routeInfo.dynamicTableName}
+        WHERE
+            service_name = #{param.serviceName}
+            and span_kind = 2
+            and target_name = #{param.targetNameHashKey}::uuid
+        <if test="param.hostName != null and param.hostName != ''">
+            and host_name = #{param.hostName}
+        </if>
+        <![CDATA[
+            AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+            ]]>
+        GROUP BY
+            caller_service_name, caller_target_name
+        order by ${pageParam.sortBy} ${pageParam.sortOrder}
+        LIMIT #{pageParam.pageSize} OFFSET #{pageParam.pageOffset};
+    </select>
+    <select id="countQueryServiceIfaceWhoCallMe" resultType="java.lang.Long">
+        SELECT
+            count(*)
+        FROM
+            (
+                SELECT
+                    1
+                FROM
+                    ${routeInfo.dynamicTableName}
+                WHERE
+                    service_name = #{param.serviceName}
+                    and span_kind = 2
+                    and target_name = #{param.targetNameHashKey}::uuid
+                <if test="param.hostName != null and param.hostName != ''">
+                    and host_name = #{param.hostName}
+                </if>
+        <![CDATA[
+                    AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+                    ]]>
+                GROUP BY
+                    caller_service_name, caller_target_name
+            ) as tempTable
+    </select>
+    <select id="queryWhoCallMeGroupByService" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        SELECT
+        caller_service_name as callerServiceName,
+        SUM ( avg_duration * cnt ) AS totalTime,
+        SUM ( cnt ) AS totalCount ,
+        ROUND( SUM ( avg_duration * cnt )/SUM ( cnt ), 2) as avgDuration
+        FROM
+        ${routeInfo.dynamicTableName}
+        WHERE
+        service_name = #{param.serviceName}
+        and span_kind = 2
+        and target_name = #{param.targetNameHashKey}::uuid
+        <if test="param.hostName != null and param.hostName != ''">
+            and host_name = #{param.hostName}
+        </if>
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        GROUP BY
+        caller_service_name
+        order by totalTime desc
+    </select>
+
+    <select id="queryDbSummaryByServiceName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+           target_name                 as targetName,
+           caller_target_name          as callerTargetName,
+           ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration,
+           sum(cnt)                    as totalCount,
+           sum(error_num)              as totalError
+        from ${routeInfo.dynamicTableName}
+        where
+          service_name = #{param.serviceName}
+          and system_type = #{param.systemType}
+          and span_kind = #{param.spanKind}
+          <if test="param.hostName != null and param.hostName != ''">
+            and host_name = #{param.hostName}
+          </if>
+        <![CDATA[
+            AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+            ]]>
+        group by caller_target_name, target_name
+    </select>
+
+    <!--suppress SqlRedundantOrderingDirection -->
+    <select id="queryDbDetailByServiceName" resultType="org.prism.apm.ui.server.entity.model.service.ServiceCallView">
+        select
+            time_bucket('${param.strInterval}', time) AT TIME ZONE #{dateParam.timezone} as timeb,
+            SUM(cnt) as totalCount,
+            SUM(error_num) as totalError,
+            ROUND(SUM(avg_duration*cnt)/SUM(cnt), 2) as avgDuration
+        from ${routeInfo.dynamicTableName}
+        where
+            service_name = #{param.serviceName}
+            and span_kind = #{param.spanKind}
+            and target_name = #{param.targetNameHashKey}::uuid
+            <if test="param.systemType != null and param.systemType != ''">
+                and system_type = #{param.systemType}
+            </if>
+            <if test="param.hostName != null and param.hostName != ''">
+                and host_name = #{param.hostName}
+            </if>
+        <![CDATA[
+            AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+            ]]>
+            and caller_target_name = #{param.callerTargetNameHashKey}::uuid
+        group by timeb
+        order by timeb
+    </select>
+
+</mapper>

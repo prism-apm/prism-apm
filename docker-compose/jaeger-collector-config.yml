@@ -1,0 +1,62 @@
+service:
+  extensions: [healthcheckv2]
+  pipelines:
+    traces:
+      receivers: [otlp, jaeger, zipkin]
+      processors: [batch]
+      exporters: [kafka]
+  telemetry:
+    resource:
+      service.name: jaeger-collector-kafka
+    metrics:
+      level: detailed
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}"
+                port: 8888
+    logs:
+      level: info
+
+extensions:
+  healthcheckv2:
+    use_v2: true
+    http:
+      endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:13133"
+    grpc:
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:4317"
+      http:
+        endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:4318"
+
+  jaeger:
+    protocols:
+      grpc:
+        endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:14250"
+      thrift_http:
+        endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:14268"
+      thrift_binary:
+        endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:6832"
+      thrift_compact:
+        endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:6831"
+
+  zipkin:
+    endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:9411"
+
+processors:
+  batch:
+
+exporters:
+  kafka:
+    brokers:
+      - "${env:KAFKA_BROKERS:-localhost:9092}"
+    topic: "${env:KAFKA_TOPIC:-opentelemetry-trace}"
+    encoding: otlp_json
+    # Use trace id as the Kafka message key, so spans from the same trace
+    # are more likely to be sent to the same partition.
+    partition_traces_by_id: true

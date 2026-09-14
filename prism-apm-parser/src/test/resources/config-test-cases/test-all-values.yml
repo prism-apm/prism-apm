@@ -1,0 +1,37 @@
+version: 1.0-boundary
+parser:
+  componentDefinitions:
+    - name: "boundary-rule"
+      match:
+        - empty_key: ""
+      outputs:
+        # Case 1: vals is null.
+        serviceName:
+          vals:
+
+        # Case 2: vals contains an empty string.
+        spanKind:
+          vals:
+            - ""
+
+        # Case 3: defaultVal is an empty string.
+        actionName:
+          defaultVal: ""
+        
+        # Case 4: values contain various special characters.
+        targetName:
+          vals:
+            - "specialchars"
+
+        # Case 5: vals contains multiple values.
+        component:
+          vals:
+            - "value1"
+            - "value2"
+            - "value3"
+
+        # Case 6 (added): contains both vals and defaultVal.
+        error:
+          vals:
+            - "error-val"
+          defaultVal: "error-default"

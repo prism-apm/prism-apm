@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- for outputting logback -->
+<!--    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />-->
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+
+    <!-- ############# property start ############# -->
+    <!--  log path  -->
+    <property name="log.path" value="logs" />
+
+    <!--Colored log output format-->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%level){blue} %clr(${PID}){magenta} %clr([%thread]){orange} %clr(%logger){cyan} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <!-- Non-colored log output format -->
+    <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n" />
+
+    <springProperty scope="context" name="LOG_MAX_SIZE" source="logging.custom.server.max-file-size" defaultValue="100MB"/>
+    <springProperty scope="context" name="LOG_MAX_HISTORY" source="logging.custom.server.max-history" defaultValue="30"/>
+    <springProperty scope="context" name="LOG_TOTAL_SIZE" source="logging.custom.server.total-size-cap" defaultValue="1GB"/>
+    <!-- ############# property end ############# -->
+
+
+
+    <!-- ############# appender start ############# -->
+    <!--Appender that writes logs to the console. Use the default one but remove charset; otherwise Tomcat on Windows may produce garbled text.-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!--Appender that writes logs to files-->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/server.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Roll daily -->
+            <fileNamePattern>${log.path}/server-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${LOG_MAX_SIZE}</maxFileSize>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_SIZE}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- reprocessing appender -->
+    <appender name="REPROCESSING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/reprocessing.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/reprocessing-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${LOG_MAX_SIZE}</maxFileSize>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_SIZE}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- unparsed span appender -->
+    <appender name="UNPARSED_SPAN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/unparsed_span.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/unparsed_span-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${LOG_MAX_SIZE}</maxFileSize>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_SIZE}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- unparsed span appender -->
+    <appender name="UNPARSED_SERVICE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/unparsed_service.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/unparsed_service-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${LOG_MAX_SIZE}</maxFileSize>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_SIZE}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="STATS_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/stats.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/stats-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${LOG_MAX_SIZE}</maxFileSize>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_SIZE}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="CACHE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/cache.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/cache-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${LOG_MAX_SIZE}</maxFileSize>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_SIZE}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ############# appender end ############# -->
+
+
+
+    <!-- ############# logger start ############# -->
+    <!-- Logging configuration for specific classes -->
+    <logger name="org.prism.apm.parser.consumer.DelayedQueueReprocessingConsumer" additivity="false">
+        <appender-ref ref="REPROCESSING_FILE"/>
+    </logger>
+
+    <logger name="org.prism.apm.parser.service.reprocessing.bo.ReprocessingBo" additivity="false">
+        <appender-ref ref="REPROCESSING_FILE"/>
+    </logger>
+
+
+
+    <logger name="org.prism.apm.parser.service.parser.OpenTelemetrySpanParser" additivity="false" >
+        <appender-ref ref="UNPARSED_SPAN_FILE" />
+    </logger>
+
+    <logger name="org.prism.apm.parser.config.ServiceParseConfig" additivity="false" >
+        <appender-ref ref="UNPARSED_SERVICE_FILE" />
+    </logger>
+
+    <logger name="org.prism.apm.parser.scheduler.StatsScheduler" additivity="false" >
+        <appender-ref ref="STATS_FILE" />
+    </logger>
+
+
+    <logger name="org.prism.apm.parser.cache.listener.CacheEventLogger" additivity="false" >
+        <appender-ref ref="CACHE_FILE" />
+    </logger>
+
+
+    <!--Production: print to console and write to file-->
+    <springProfile name="prod">
+        <root level="info">
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="info">
+            <appender-ref ref="FILE"/>
+        </root>
+    </springProfile>
+
+
+    <!-- Default values (when no Spring profile is specified) -->
+    <root level="info">
+        <appender-ref ref="CONSOLE"/> <!-- Output to console -->
+        <appender-ref ref="FILE"/>   <!-- Output to log file -->
+    </root>
+    <!-- ############# logger end ############# -->
+
+
+</configuration>

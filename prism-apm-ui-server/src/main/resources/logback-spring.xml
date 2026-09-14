@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--Appender that writes logs to the console. Use the default one but remove charset; otherwise Tomcat on Windows may produce garbled text.-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--Appender that writes logs to files-->
+    <appender name="LOGIC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- Change this class to SizeAndTimeBasedRollingPolicy -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Note: the file name pattern must include %i to distinguish indexes when files grow too large -->
+            <FileNamePattern>logs/ui-server-%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+
+            <!-- Maximum size of a single file, configured here directly -->
+            <maxFileSize>100MB</maxFileSize>
+
+            <!-- Log retention days -->
+            <maxHistory>10</maxHistory>
+
+            <!-- Optional: total size cap for all log files; old files are deleted when exceeded -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+
+        <!-- Note: removed the original separate triggeringPolicy node -->
+    </appender>
+
+
+    <!--Production: print to console and write to file-->
+    <springProfile name="prod">
+        <root level="info">
+            <appender-ref ref="LOGIC"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="info">
+            <appender-ref ref="LOGIC"/>
+        </root>
+    </springProfile>
+
+    <!--Development: print to console-->
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+
+
+
+
+    <!--======================================-->
+    <!-- [Added] Appender dedicated to database troubleshooting -->
+    <!--======================================-->
+    <appender name="DB_TRACE_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Independent log file name -->
+            <FileNamePattern>logs/db-trace-%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+            <maxFileSize>200MB</maxFileSize>
+            <!-- Delete these files after troubleshooting because TRACE-level logs grow very quickly -->
+            <maxHistory>3</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!-- Include the specific logger name in the format to distinguish Hikari from PostgreSQL -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{100} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- [Added] Logger configuration: route HikariCP and PostgreSQL logs to DB_TRACE_FILE -->
+    <!-- additivity="false" means logs are not propagated upward, so they are not printed to CONSOLE or ui-server.log -->
+
+    <!-- 1. Connection pool logs: show connection acquisition, return, timeout, and related details -->
+    <logger name="com.zaxxer.hikari" additivity="false">
+        <appender-ref ref="DB_TRACE_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- 2. PostgreSQL driver logs: show SQL sending, packet receiving, and result set reading -->
+    <logger name="org.postgresql" additivity="false">
+        <appender-ref ref="DB_TRACE_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- 3. Enable this if dynamic datasource switching details are needed -->
+    <logger name="com.baomidou.dynamic" additivity="false">
+        <appender-ref ref="DB_TRACE_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!--    SQL statements-->
+    <logger name="org.prism.apm.ui.server.mapper" additivity="false">
+        <appender-ref ref="DB_TRACE_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+</configuration>

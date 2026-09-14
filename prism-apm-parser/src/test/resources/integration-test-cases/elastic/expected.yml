@@ -1,0 +1,84 @@
+-
+  time: "2025-08-21T06:42:08.106791Z"
+  spanId: "f53270080b586725"
+  traceId: "5dbe1884882f136e95b039e2dce629e8"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/middleware"
+  remoteAddr: "172.18.0.17"
+  caller_time: "1970-01-01T00:00:00.000000Z"
+
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 33856
+  cnt: 1
+  error: 0
+
+- 
+  time: "2025-08-21T06:42:08.116929Z"
+  spanId: "65867bd7a7aab2aa"
+  traceId: "5dbe1884882f136e95b039e2dce629e8"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "elasticsearch-api"
+  systemType: "elasticsearch"
+  actionName: "get"
+  targetName: "http://span-es:19200/test-index/_doc/1"
+  remoteAddr: "span-es"
+  caller_time: "2025-08-21T06:42:08.106791Z"
+
+  caller_spanId: "f53270080b586725"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/middleware"
+  caller_remoteAddr: "172.18.0.17"
+
+  duration: 21597
+  cnt: 1
+  error: 0
+
+
+- 
+  time: "2025-08-21T06:42:08.118682Z"
+  spanId: "55b1d51835987f37"
+  traceId: "5dbe1884882f136e95b039e2dce629e8"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "io.opentelemetry.apache-httpasyncclient-4.1"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "http://span-es:19200/test-index/_doc/1"
+  remoteAddr: "span-es"
+
+  caller_time: "2025-08-21T06:42:08.116929Z"
+  caller_spanId: "65867bd7a7aab2aa"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 3
+  caller_component: "elasticsearch-api"
+  caller_systemType: "elasticsearch"
+  caller_actionName: "get"
+  caller_targetName: "http://span-es:19200/test-index/_doc/1"
+  caller_remoteAddr: "span-es"
+
+  duration: 8406
+  cnt: 1
+  error: 0

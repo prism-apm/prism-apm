@@ -1,0 +1,50 @@
+version: 1.0-combinations-v2
+parser:
+  componentDefinitions:
+    - name: "test-component"
+      match:
+        - key: "A"
+      outputs:
+        # Scenario 1.1: Comp has VALS, Default has DEFAULTVAL
+        actionName:
+          vals:
+            - "component-action"
+
+        # Scenario 1.2: Comp has DEFAULTVAL, Default has VALS
+        targetName:
+          defaultVal: "component-target"
+
+        # Scenario 1.3: Comp has BOTH, Default has BOTH
+        component:
+          vals:
+            - "component-component-val"
+          defaultVal: "component-component-default"
+
+  defaults:
+    outputs:
+      # --- Rules for Scenarios 1.x (to test non-overwrite) ---
+      actionName:
+        defaultVal: "default-action-should-be-ignored"
+      targetName:
+        vals:
+          - "default-target-should-be-ignored"
+      component:
+        vals:
+          - "default-component-val-should-be-ignored"
+        defaultVal: "default-component-default-should-be-ignored"
+
+      # --- Rules for Scenarios 2.x (to test merge) ---
+      # Scenario 2.1 (Default has VALS only)
+      systemType:
+        vals:
+          - "default-system"
+
+      # Scenario 2.2 (Default has DEFAULTVAL only)
+      spanKind:
+        defaultVal: "default-kind"
+
+      # Scenario 2.3 (Default has BOTH)
+      error:
+        vals:
+          - "1"
+        defaultVal: "0"

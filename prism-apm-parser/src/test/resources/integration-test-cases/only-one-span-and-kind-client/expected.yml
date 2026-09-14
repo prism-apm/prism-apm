@@ -1,0 +1,27 @@
+- 
+  time: "2025-08-21T07:22:25.498379Z"
+  spanId: "0c34fa1c8b3aa475"
+  traceId: "72f724c8236a7f5356edf7ea954c4741"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "io.opentelemetry.mongo-3.1"
+  systemType: "mongodb"
+  actionName: "find"
+  targetName: "{\"find\": \"user\", \"filter\": {\"userName\": \"?\"}, \"limit\": \"?\", \"singleBatch\": \"?\", \"$db\": \"?\", \"lsid\": {\"id\": \"?\"}}"
+  remoteAddr: "span-mongodb"
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 5813
+  cnt: 1
+  error: 0

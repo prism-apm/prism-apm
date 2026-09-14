@@ -1,0 +1,11 @@
+version: 1.0-test
+parser:
+  componentDefinitions:
+    - name: "database"
+      match:
+        - span-attributes__db.system: ".*"
+      outputs:
+        # This is an invalid field name
+        invalidFieldName:
+          vals:
+            - "span-attributes__db.operation"

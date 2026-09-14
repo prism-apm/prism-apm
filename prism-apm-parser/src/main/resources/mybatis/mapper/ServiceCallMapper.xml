@@ -1,0 +1,523 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.prism.apm.parser.repository.ServiceCallMapper">
+  <resultMap id="BaseResultMap" type="org.prism.apm.parser.model.entity.ServiceCallEntity">
+    <!--@Table service_call-->
+    <id column="time" jdbcType="TIMESTAMP" property="time" />
+    <id column="span_id" jdbcType="VARCHAR" property="spanId" />
+    <result column="trace_id" jdbcType="VARCHAR" property="traceId" />
+    <result column="service_name" jdbcType="VARCHAR" property="serviceName" />
+    <result column="host_name" jdbcType="VARCHAR" property="hostName" />
+    <result column="action_name" jdbcType="VARCHAR" property="actionName" />
+    <result column="target_name" jdbcType="OTHER" property="targetNameId" typeHandler="org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler" />
+    <result column="remote_addr" jdbcType="VARCHAR" property="remoteAddr" />
+    <result column="system_type" jdbcType="VARCHAR" property="systemType" />
+    <result column="component" jdbcType="VARCHAR" property="component" />
+    <result column="span_kind" jdbcType="SMALLINT" property="spanKind" />
+    <result column="caller_time" jdbcType="TIMESTAMP" property="callerTime" />
+    <result column="caller_span_id" jdbcType="VARCHAR" property="callerSpanId" />
+    <result column="caller_service_name" jdbcType="VARCHAR" property="callerServiceName" />
+    <result column="caller_host_name" jdbcType="VARCHAR" property="callerHostName" />
+    <result column="caller_action_name" jdbcType="VARCHAR" property="callerActionName" />
+    <result column="caller_target_name" jdbcType="OTHER" property="callerTargetNameId" typeHandler="org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler" />
+    <result column="caller_remote_addr" jdbcType="VARCHAR" property="callerRemoteAddr" />
+    <result column="caller_system_type" jdbcType="VARCHAR" property="callerSystemType" />
+    <result column="caller_component" jdbcType="VARCHAR" property="callerComponent" />
+    <result column="caller_span_kind" jdbcType="SMALLINT" property="callerSpanKind" />
+    <result column="cnt" jdbcType="BIGINT" property="cnt" />
+    <result column="duration" jdbcType="BIGINT" property="duration" />
+    <result column="error" jdbcType="BIGINT" property="error" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    "time", span_id, trace_id, service_name, host_name, action_name, target_name, remote_addr, 
+    system_type, component, span_kind, caller_time, caller_span_id, caller_service_name, 
+    caller_host_name, caller_action_name, caller_target_name, caller_remote_addr, caller_system_type, 
+    caller_component, caller_span_kind, cnt, duration, error, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from service_call
+    where "time" = #{time,jdbcType=TIMESTAMP}
+      and span_id = #{spanId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="map">
+    delete from service_call
+    where "time" = #{time,jdbcType=TIMESTAMP}
+      and span_id = #{spanId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="org.prism.apm.parser.model.entity.ServiceCallEntity">
+    insert into service_call ("time", span_id, trace_id, 
+      service_name, host_name, action_name, 
+      target_name, remote_addr, system_type, 
+      component, span_kind, caller_time, 
+      caller_span_id, caller_service_name, caller_host_name, 
+      caller_action_name, caller_target_name, caller_remote_addr, 
+      caller_system_type, caller_component, caller_span_kind, 
+      cnt, duration, error, 
+      create_time, update_time)
+    values (#{time,jdbcType=TIMESTAMP}, #{spanId,jdbcType=VARCHAR}, #{traceId,jdbcType=VARCHAR}, 
+      #{serviceName,jdbcType=VARCHAR}, #{hostName,jdbcType=VARCHAR}, #{actionName,jdbcType=VARCHAR}, 
+      #{targetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler}, #{remoteAddr,jdbcType=VARCHAR}, #{systemType,jdbcType=VARCHAR},
+      #{component,jdbcType=VARCHAR}, #{spanKind,jdbcType=SMALLINT}, #{callerTime,jdbcType=TIMESTAMP}, 
+      #{callerSpanId,jdbcType=VARCHAR}, #{callerServiceName,jdbcType=VARCHAR}, #{callerHostName,jdbcType=VARCHAR}, 
+      #{callerActionName,jdbcType=VARCHAR}, #{callerTargetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler}, #{callerRemoteAddr,jdbcType=VARCHAR},
+      #{callerSystemType,jdbcType=VARCHAR}, #{callerComponent,jdbcType=VARCHAR}, #{callerSpanKind,jdbcType=SMALLINT}, 
+      #{cnt,jdbcType=BIGINT}, #{duration,jdbcType=BIGINT}, #{error,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="org.prism.apm.parser.model.entity.ServiceCallEntity">
+    insert into service_call
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="time != null">
+        "time",
+      </if>
+      <if test="spanId != null">
+        span_id,
+      </if>
+      <if test="traceId != null">
+        trace_id,
+      </if>
+      <if test="serviceName != null">
+        service_name,
+      </if>
+      <if test="hostName != null">
+        host_name,
+      </if>
+      <if test="actionName != null">
+        action_name,
+      </if>
+      <if test="targetNameId != null">
+        target_name,
+      </if>
+      <if test="remoteAddr != null">
+        remote_addr,
+      </if>
+      <if test="systemType != null">
+        system_type,
+      </if>
+      <if test="component != null">
+        component,
+      </if>
+      <if test="spanKind != null">
+        span_kind,
+      </if>
+      <if test="callerTime != null">
+        caller_time,
+      </if>
+      <if test="callerSpanId != null">
+        caller_span_id,
+      </if>
+      <if test="callerServiceName != null">
+        caller_service_name,
+      </if>
+      <if test="callerHostName != null">
+        caller_host_name,
+      </if>
+      <if test="callerActionName != null">
+        caller_action_name,
+      </if>
+      <if test="callerTargetNameId != null">
+        caller_target_name,
+      </if>
+      <if test="callerRemoteAddr != null">
+        caller_remote_addr,
+      </if>
+      <if test="callerSystemType != null">
+        caller_system_type,
+      </if>
+      <if test="callerComponent != null">
+        caller_component,
+      </if>
+      <if test="callerSpanKind != null">
+        caller_span_kind,
+      </if>
+      <if test="cnt != null">
+        cnt,
+      </if>
+      <if test="duration != null">
+        duration,
+      </if>
+      <if test="error != null">
+        error,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="time != null">
+        #{time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="spanId != null">
+        #{spanId,jdbcType=VARCHAR},
+      </if>
+      <if test="traceId != null">
+        #{traceId,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceName != null">
+        #{serviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="hostName != null">
+        #{hostName,jdbcType=VARCHAR},
+      </if>
+      <if test="actionName != null">
+        #{actionName,jdbcType=VARCHAR},
+      </if>
+      <if test="targetNameId != null">
+        #{targetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      </if>
+      <if test="remoteAddr != null">
+        #{remoteAddr,jdbcType=VARCHAR},
+      </if>
+      <if test="systemType != null">
+        #{systemType,jdbcType=VARCHAR},
+      </if>
+      <if test="component != null">
+        #{component,jdbcType=VARCHAR},
+      </if>
+      <if test="spanKind != null">
+        #{spanKind,jdbcType=SMALLINT},
+      </if>
+      <if test="callerTime != null">
+        #{callerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="callerSpanId != null">
+        #{callerSpanId,jdbcType=VARCHAR},
+      </if>
+      <if test="callerServiceName != null">
+        #{callerServiceName,jdbcType=VARCHAR},
+      </if>
+      <if test="callerHostName != null">
+        #{callerHostName,jdbcType=VARCHAR},
+      </if>
+      <if test="callerActionName != null">
+        #{callerActionName,jdbcType=VARCHAR},
+      </if>
+      <if test="callerTargetNameId != null">
+        #{callerTargetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      </if>
+      <if test="callerRemoteAddr != null">
+        #{callerRemoteAddr,jdbcType=VARCHAR},
+      </if>
+      <if test="callerSystemType != null">
+        #{callerSystemType,jdbcType=VARCHAR},
+      </if>
+      <if test="callerComponent != null">
+        #{callerComponent,jdbcType=VARCHAR},
+      </if>
+      <if test="callerSpanKind != null">
+        #{callerSpanKind,jdbcType=SMALLINT},
+      </if>
+      <if test="cnt != null">
+        #{cnt,jdbcType=BIGINT},
+      </if>
+      <if test="duration != null">
+        #{duration,jdbcType=BIGINT},
+      </if>
+      <if test="error != null">
+        #{error,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="org.prism.apm.parser.model.entity.ServiceCallEntity">
+    update service_call
+    <set>
+      <if test="traceId != null">
+        trace_id = #{traceId,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceName != null">
+        service_name = #{serviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="hostName != null">
+        host_name = #{hostName,jdbcType=VARCHAR},
+      </if>
+      <if test="actionName != null">
+        action_name = #{actionName,jdbcType=VARCHAR},
+      </if>
+      <if test="targetNameId != null">
+        target_name = #{targetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      </if>
+      <if test="remoteAddr != null">
+        remote_addr = #{remoteAddr,jdbcType=VARCHAR},
+      </if>
+      <if test="systemType != null">
+        system_type = #{systemType,jdbcType=VARCHAR},
+      </if>
+      <if test="component != null">
+        component = #{component,jdbcType=VARCHAR},
+      </if>
+      <if test="spanKind != null">
+        span_kind = #{spanKind,jdbcType=SMALLINT},
+      </if>
+      <if test="callerTime != null">
+        caller_time = #{callerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="callerSpanId != null">
+        caller_span_id = #{callerSpanId,jdbcType=VARCHAR},
+      </if>
+      <if test="callerServiceName != null">
+        caller_service_name = #{callerServiceName,jdbcType=VARCHAR},
+      </if>
+      <if test="callerHostName != null">
+        caller_host_name = #{callerHostName,jdbcType=VARCHAR},
+      </if>
+      <if test="callerActionName != null">
+        caller_action_name = #{callerActionName,jdbcType=VARCHAR},
+      </if>
+      <if test="callerTargetNameId != null">
+        caller_target_name = #{callerTargetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      </if>
+      <if test="callerRemoteAddr != null">
+        caller_remote_addr = #{callerRemoteAddr,jdbcType=VARCHAR},
+      </if>
+      <if test="callerSystemType != null">
+        caller_system_type = #{callerSystemType,jdbcType=VARCHAR},
+      </if>
+      <if test="callerComponent != null">
+        caller_component = #{callerComponent,jdbcType=VARCHAR},
+      </if>
+      <if test="callerSpanKind != null">
+        caller_span_kind = #{callerSpanKind,jdbcType=SMALLINT},
+      </if>
+      <if test="cnt != null">
+        cnt = #{cnt,jdbcType=BIGINT},
+      </if>
+      <if test="duration != null">
+        duration = #{duration,jdbcType=BIGINT},
+      </if>
+      <if test="error != null">
+        error = #{error,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where "time" = #{time,jdbcType=TIMESTAMP}
+      and span_id = #{spanId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.prism.apm.parser.model.entity.ServiceCallEntity">
+    update service_call
+    set trace_id = #{traceId,jdbcType=VARCHAR},
+      service_name = #{serviceName,jdbcType=VARCHAR},
+      host_name = #{hostName,jdbcType=VARCHAR},
+      action_name = #{actionName,jdbcType=VARCHAR},
+      target_name = #{targetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      remote_addr = #{remoteAddr,jdbcType=VARCHAR},
+      system_type = #{systemType,jdbcType=VARCHAR},
+      component = #{component,jdbcType=VARCHAR},
+      span_kind = #{spanKind,jdbcType=SMALLINT},
+      caller_time = #{callerTime,jdbcType=TIMESTAMP},
+      caller_span_id = #{callerSpanId,jdbcType=VARCHAR},
+      caller_service_name = #{callerServiceName,jdbcType=VARCHAR},
+      caller_host_name = #{callerHostName,jdbcType=VARCHAR},
+      caller_action_name = #{callerActionName,jdbcType=VARCHAR},
+      caller_target_name = #{callerTargetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      caller_remote_addr = #{callerRemoteAddr,jdbcType=VARCHAR},
+      caller_system_type = #{callerSystemType,jdbcType=VARCHAR},
+      caller_component = #{callerComponent,jdbcType=VARCHAR},
+      caller_span_kind = #{callerSpanKind,jdbcType=SMALLINT},
+      cnt = #{cnt,jdbcType=BIGINT},
+      duration = #{duration,jdbcType=BIGINT},
+      error = #{error,jdbcType=BIGINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where "time" = #{time,jdbcType=TIMESTAMP}
+      and span_id = #{spanId,jdbcType=VARCHAR}
+  </update>
+
+
+  <delete id="deleteDataInRange" parameterType="map">
+    <![CDATA[
+    DELETE FROM service_call
+    WHERE time >= #{startTime, jdbcType=TIMESTAMP} AND time < #{endTime, jdbcType=TIMESTAMP}
+        ]]>
+  </delete>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM service_call
+  </select>
+
+
+  <select id="refreshServiceCallMinute" parameterType="map">
+    CALL refresh_continuous_aggregate('service_call_minute', #{startTime, jdbcType=TIMESTAMP}, #{endTime, jdbcType=TIMESTAMP})
+  </select>
+
+
+
+  <insert id="batchUpsert" parameterType="java.util.List">
+    INSERT INTO service_call
+    (time, trace_id, span_id, service_name, host_name, action_name, target_name, remote_addr, system_type, component, span_kind, caller_time,
+    caller_span_id, caller_service_name, caller_host_name, caller_action_name, caller_target_name, caller_remote_addr, caller_system_type, caller_component,
+    caller_span_kind, cnt, duration, error, create_time, update_time)
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+      (#{item.time,jdbcType=TIMESTAMP},
+      #{item.traceId,jdbcType=VARCHAR},
+      #{item.spanId,jdbcType=VARCHAR},
+      #{item.serviceName,jdbcType=VARCHAR},
+      #{item.hostName,jdbcType=VARCHAR},
+      #{item.actionName,jdbcType=VARCHAR},
+      #{item.targetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      #{item.remoteAddr,jdbcType=VARCHAR},
+      #{item.systemType,jdbcType=VARCHAR},
+      #{item.component,jdbcType=VARCHAR},
+      #{item.spanKind,jdbcType=SMALLINT},
+      #{item.callerTime,jdbcType=TIMESTAMP},
+      #{item.callerSpanId,jdbcType=VARCHAR},
+      #{item.callerServiceName,jdbcType=VARCHAR},
+      #{item.callerHostName,jdbcType=VARCHAR},
+      #{item.callerActionName,jdbcType=VARCHAR},
+      #{item.callerTargetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      #{item.callerRemoteAddr,jdbcType=VARCHAR},
+      #{item.callerSystemType,jdbcType=VARCHAR},
+      #{item.callerComponent,jdbcType=VARCHAR},
+      #{item.callerSpanKind,jdbcType=SMALLINT},
+      #{item.cnt,jdbcType=BIGINT},
+      #{item.duration,jdbcType=BIGINT},
+      #{item.error,jdbcType=BIGINT},
+      #{item.createTime,jdbcType=TIMESTAMP},
+      #{item.updateTime,jdbcType=TIMESTAMP})
+    </foreach>
+    ON CONFLICT (time, span_id) DO UPDATE SET
+    trace_id = EXCLUDED.trace_id,
+    host_name = EXCLUDED.host_name,
+    action_name = EXCLUDED.action_name,
+    target_name = EXCLUDED.target_name,
+    remote_addr = EXCLUDED.remote_addr,
+    system_type = EXCLUDED.system_type,
+    component = EXCLUDED.component,
+    span_kind = EXCLUDED.span_kind,
+    caller_time = EXCLUDED.caller_time,
+    caller_span_id = EXCLUDED.caller_span_id,
+    caller_service_name = EXCLUDED.caller_service_name,
+    caller_host_name = EXCLUDED.caller_host_name,
+    caller_action_name = EXCLUDED.caller_action_name,
+    caller_target_name = EXCLUDED.caller_target_name,
+    caller_remote_addr = EXCLUDED.caller_remote_addr,
+    caller_system_type = EXCLUDED.caller_system_type,
+    caller_component = EXCLUDED.caller_component,
+    caller_span_kind = EXCLUDED.caller_span_kind,
+    cnt = EXCLUDED.cnt,
+    duration = EXCLUDED.duration,
+    error = EXCLUDED.error,
+    span_id = EXCLUDED.span_id,
+    update_time = EXCLUDED.update_time
+  </insert>
+
+
+  <insert id="batchUpsertDoNothing" parameterType="java.util.List">
+    INSERT INTO service_call
+    (time, trace_id, span_id, service_name, host_name, action_name, target_name, remote_addr, system_type, component, span_kind, caller_time,
+    caller_span_id, caller_service_name, caller_host_name, caller_action_name, caller_target_name, caller_remote_addr, caller_system_type, caller_component,
+    caller_span_kind, cnt, duration, error, create_time, update_time)
+    VALUES
+    <foreach collection="list" item="item" separator=",">
+      (#{item.time,jdbcType=TIMESTAMP},
+      #{item.traceId,jdbcType=VARCHAR},
+      #{item.spanId,jdbcType=VARCHAR},
+      #{item.serviceName,jdbcType=VARCHAR},
+      #{item.hostName,jdbcType=VARCHAR},
+      #{item.actionName,jdbcType=VARCHAR},
+      #{item.targetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      #{item.remoteAddr,jdbcType=VARCHAR},
+      #{item.systemType,jdbcType=VARCHAR},
+      #{item.component,jdbcType=VARCHAR},
+      #{item.spanKind,jdbcType=SMALLINT},
+      #{item.callerTime,jdbcType=TIMESTAMP},
+      #{item.callerSpanId,jdbcType=VARCHAR},
+      #{item.callerServiceName,jdbcType=VARCHAR},
+      #{item.callerHostName,jdbcType=VARCHAR},
+      #{item.callerActionName,jdbcType=VARCHAR},
+      #{item.callerTargetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      #{item.callerRemoteAddr,jdbcType=VARCHAR},
+      #{item.callerSystemType,jdbcType=VARCHAR},
+      #{item.callerComponent,jdbcType=VARCHAR},
+      #{item.callerSpanKind,jdbcType=SMALLINT},
+      #{item.cnt,jdbcType=BIGINT},
+      #{item.duration,jdbcType=BIGINT},
+      #{item.error,jdbcType=BIGINT},
+      #{item.createTime,jdbcType=TIMESTAMP},
+      #{item.updateTime,jdbcType=TIMESTAMP})
+    </foreach>
+    ON CONFLICT (time, span_id) DO NOTHING
+  </insert>
+
+
+  <insert id="batchInsert">
+    INSERT INTO service_call(
+    time,
+    trace_id,
+    span_id,
+    service_name,
+    host_name,
+    action_name,
+    target_name,
+    remote_addr,
+    system_type,
+    component,
+    span_kind,
+    caller_time,
+    caller_span_id,
+    caller_service_name,
+    caller_host_name,
+    caller_action_name,
+    caller_target_name,
+    caller_system_type,
+    caller_remote_addr,
+    caller_component,
+    caller_span_kind,
+    cnt,
+    duration,
+    error,
+    create_time,
+    update_time
+    ) VALUES
+    <foreach collection="list" index="index" item="element" separator=",">
+      (
+      #{element.time,jdbcType=TIMESTAMP},
+      #{element.traceId,jdbcType=VARCHAR},
+      #{element.spanId,jdbcType=VARCHAR},
+      #{element.serviceName,jdbcType=VARCHAR},
+      #{element.hostName,jdbcType=VARCHAR},
+      #{element.actionName,jdbcType=VARCHAR},
+      #{element.targetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      #{element.remoteAddr,jdbcType=VARCHAR},
+      #{element.systemType,jdbcType=VARCHAR},
+      #{element.component,jdbcType=VARCHAR},
+      #{element.spanKind,jdbcType=SMALLINT},
+      #{element.callerTime,jdbcType=TIMESTAMP},
+      #{element.callerSpanId,jdbcType=VARCHAR},
+      #{element.callerServiceName,jdbcType=VARCHAR},
+      #{element.callerHostName,jdbcType=VARCHAR},
+      #{element.callerActionName,jdbcType=VARCHAR},
+      #{element.callerTargetNameId,jdbcType=OTHER,typeHandler=org.prism.apm.parser.config.mybatis.PostgresUuidTypeHandler},
+      #{element.callerSystemType,jdbcType=VARCHAR},
+      #{element.callerRemoteAddr,jdbcType=VARCHAR},
+      #{element.callerComponent,jdbcType=VARCHAR},
+      #{element.callerSpanKind,jdbcType=SMALLINT},
+      #{element.cnt,jdbcType=BIGINT},
+      #{element.duration,jdbcType=BIGINT},
+      #{element.error,jdbcType=BIGINT},
+      #{element.createTime,jdbcType=TIMESTAMP},
+      #{element.updateTime,jdbcType=TIMESTAMP}
+      )
+    </foreach>
+  </insert>
+</mapper>

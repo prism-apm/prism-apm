@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.prism.apm.ui.server.mapper.project.ProjectMapper">
+    <resultMap id="BaseResultMap" type="org.prism.apm.ui.server.entity.model.project.Project">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="display" property="display" jdbcType="VARCHAR"/>
+        <result column="created_at" property="createdAt" jdbcType="TIMESTAMP"/>
+        <result column="updated_at" property="updatedAt" jdbcType="TIMESTAMP"/>
+    </resultMap>
+</mapper> 

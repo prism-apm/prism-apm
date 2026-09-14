@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--dynamicConfig controls whether this configuration can be changed dynamically; the default is true-->
+<ehcache dynamicConfig="true">
+    <!-- outerSpanIdCahce cache -->
+    <!-- eternal: whether objects are permanently valid. Once set, timeout will not take effect.-->
+    <cache name="outerSpanIdCahce"
+           maxBytesLocalHeap="400m"
+           eternal="false"
+           timeToLiveSeconds="20"
+           overflowToDisk="false"
+           memoryStoreEvictionPolicy="FIFO"/>
+
+
+    <!-- Resource Hash Dictionary Cache (Name -> Hash) -->
+    <cache name="resource_hash_cache"
+           maxEntriesLocalHeap="100000"
+           eternal="true"
+           overflowToDisk="false"
+           memoryStoreEvictionPolicy="LRU"/>
+</ehcache>

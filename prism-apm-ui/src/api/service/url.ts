@@ -1,0 +1,10 @@
+export const OVERVIEW_DETAIL = '/api/apm/service/overview';
+export const SERVICE_DETAIL = '/api/apm/service/details';
+export const SERVICE_TRANSACTION = '/api/apm/service/transaction/list';
+export const IFACE_DETAIL = '/api/apm/service/iface/detail';
+export const IFACE_FROM_SERVICE = '/api/apm/service/iface/from/service';
+export const IFACE_FROM_IFACE = '/api/apm/service/iface/from/iface';
+export const IFACE_ANALYSE_MAP = '/api/apm/service/iface/map';
+export const IFACE_GATHER = '/api/apm/service/iface/gather';
+export const DB_LIST = '/api/apm/service/db/list';
+export const DB_DETAIL = '/api/apm/service/db/detail';

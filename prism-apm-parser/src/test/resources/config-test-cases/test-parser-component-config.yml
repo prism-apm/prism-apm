@@ -1,0 +1,91 @@
+version: 1.0
+parser:
+  # Component definition list; the parser matches in order
+  componentDefinitions:
+
+    # Definition: component name or type definition
+    - name: "database"
+      match:
+        - span-attributes__db.system: ".*"
+
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes_db.operation"
+        targetName:
+          vals:
+            - "span-attributes_db.query.text"
+        systemType:
+          vals:
+            - "span-attributes_db.system"
+
+    # Definition: message component.
+    - name: "message"
+      match:
+        - span-attributes_messaging.system: ".*"
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes_messaging.operation"
+        targetName:
+          vals:
+            - "span-attributes_messaging.destination.name"
+        systemType:
+          vals:
+            - "span-attributes_messaging.system"
+
+    # Definition: RPC component.
+    - name: "RPC"
+      match:
+        - span-attributes_rpc.system: ".*"
+      outputs:
+        targetName:
+          vals:
+            - "span-attributes_rpc.method"
+        systemType:
+          vals:
+            - "span-attributes_rpc.system"
+
+
+    # Definition: HTTP component.
+    - name: "http"
+      match:
+        - span-attributes_http.request.method: ".*"
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes_http.request.method"
+        targetName:
+          vals:
+            - "span-attributes_http.route"
+            - "span-attributes_url.path"
+        systemType:
+          vals:
+            - "span-attributes_http.request.method"
+
+  # Global default values used when no component matches or when a component does not define a field.
+  defaults:
+    outputs:
+      serviceName:
+        vals:
+          - "resource-attributes__service.name"
+      hostName:
+        vals:
+        - "resource-attributes__host.name"
+      spanKind:
+        vals:
+          - "span_kind"
+      actionName:
+        defaultVal: ""
+      targetName:
+        vals:
+          - "span_name"
+      component:
+        vals:
+          - "spans-scope_name"
+      systemType:
+        defaultVal: ""
+      error:
+        vals:
+          - "spans__status__code"
+        defaultVal: "0"

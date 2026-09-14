@@ -1,0 +1,84 @@
+-
+  time: "2025-08-21T07:28:12.179755Z"
+  spanId: "f9877df4a9f0e4a6"
+  traceId: "389df17adcde933e7235de6d5e1a8c0f"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/middleware"
+  remoteAddr: "172.18.0.17"
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 135474
+  cnt: 1
+  error: 0
+
+-
+  time: "2025-08-21T07:28:12.267886Z"
+  spanId: "f1a5b71e53e51e8a"
+  traceId: "389df17adcde933e7235de6d5e1a8c0f"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 4
+  component: "io.opentelemetry.kafka-clients-0.11"
+  systemType: "kafka"
+  actionName: "publish"
+  targetName: "test-topic"
+  remoteAddr: ""
+
+  caller_time: "2025-08-21T07:28:12.179755Z"
+  caller_spanId: "f9877df4a9f0e4a6"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/middleware"
+  caller_remoteAddr: "172.18.0.17"
+
+  duration: 260751
+  cnt: 1
+  error: 0
+
+
+- 
+  time: "2025-08-21T07:28:12.539570Z"
+  spanId: "0443cfced516c805"
+  traceId: "389df17adcde933e7235de6d5e1a8c0f"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 5
+  component: "io.opentelemetry.spring-kafka-2.7"
+  systemType: "kafka"
+  actionName: "process"
+  targetName: "test-topic"
+  remoteAddr: ""
+
+  caller_time: "2025-08-21T07:28:12.267886Z"
+  caller_spanId: "f1a5b71e53e51e8a"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 4
+  caller_component: "io.opentelemetry.kafka-clients-0.11"
+  caller_systemType: "kafka"
+  caller_actionName: "publish"
+  caller_targetName: "test-topic"
+  caller_remoteAddr: ""
+
+  duration: 3872
+  cnt: 1
+  error: 0

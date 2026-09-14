@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prism Explorer</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #e2e8f0;
+            padding: 48px 24px;
+        }
+        h1 {
+            font-size: 48px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #94a3b8;
+            margin-bottom: 48px;
+        }
+
+        /* ── Existing data: two cards ── */
+        .cards {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 40px 48px;
+            width: 280px;
+            text-align: center;
+            text-decoration: none;
+            color: #e2e8f0;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(4px);
+        }
+        .card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        .card .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .card .name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .card .desc {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        /* ── First use: wizard ── */
+        .wizard {
+            max-width: 560px;
+            width: 100%;
+        }
+        .wizard-step {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 36px 40px;
+            backdrop-filter: blur(4px);
+            margin-bottom: 16px;
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .step-badge {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #3b82f6;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .step-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        .step-desc {
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .date-range input[type="date"] {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 14px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: #e2e8f0;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .date-range input[type="date"]:focus {
+            border-color: #3b82f6;
+        }
+        .date-range input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.7);
+            cursor: pointer;
+        }
+        .date-range span {
+            color: #64748b;
+            font-size: 14px;
+            user-select: none;
+        }
+        .btn-primary {
+            padding: 12px 32px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            background: #3b82f6;
+            color: #fff;
+            transition: background 0.2s;
+            width: 100%;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+        }
+        .btn-primary:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        .btn-success {
+            display: inline-block;
+            padding: 12px 36px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            background: #22c55e;
+            color: #fff;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+        }
+        .progress-container {
+            margin-top: 16px;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .progress-label {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        #result {
+            white-space: pre-wrap;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #475569;
+            font-size: 13px;
+            margin: 20px 0;
+        }
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body>
+    <h1 data-i18n="pageTitle">Prism Explorer</h1>
+    <p class="subtitle" id="pageSubtitle" data-i18n="subtitleCards">Choose an entry to get started</p>
+
+    <!-- ═══ Existing data: two cards ═══ -->
+    <div id="sectionCards" style="display:none">
+        <div class="cards">
+            <a class="card" href="prism-explorer-data.html">
+                <div class="icon">⚡</div>
+                <div class="name" data-i18n="cardDataMock">Data Mock</div>
+                <div class="desc" data-i18n="cardDataMockDesc">Regenerate mock data or clear data</div>
+            </a>
+            <a class="card" href="http://localhost:8066/">
+                <div class="icon">📊</div>
+                <div class="name" data-i18n="cardApmMain">APM Dashboard</div>
+                <div class="desc" data-i18n="cardApmMainDesc">View trace, topology, and monitoring dashboards</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- ═══ First use: wizard ═══ -->
+    <div id="sectionWizard" style="display:none">
+        <div class="wizard">
+            <!-- Step 1: generate data -->
+            <div class="wizard-step" id="stepGenerate">
+                <div class="step-header">
+                    <div class="step-badge">1</div>
+                    <div class="step-title" data-i18n="step1Title">Generate demo data</div>
+                </div>
+                <div class="step-desc" data-i18n="step1Desc">
+                    Select a date range and click the button below to auto-generate demo data. Once complete, you can explore the APM dashboard.
+                </div>
+                <div class="date-range">
+                    <input type="date" id="startDateInput">
+                    <span data-i18n="dateRangeSep">to</span>
+                    <input type="date" id="endDateInput">
+                </div>
+                <button class="btn-primary" id="genBtn" data-i18n="genBtn">Generate</button>
+
+                <div class="progress-container" id="progressContainer" style="display:none">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-label" id="progressLabel" data-i18n="progressStarting">Preparing...</div>
+                </div>
+
+                <div id="result" style="display:none"></div>
+            </div>
+
+            <!-- Step 2: open dashboard -->
+            <div class="wizard-step" id="stepEnter" style="display:none">
+                <div class="step-header">
+                    <div class="step-badge" style="background:#22c55e">✓</div>
+                    <div class="step-title" data-i18n="step2Title">Data is ready</div>
+                </div>
+                <div class="step-desc" data-i18n="step2Desc">
+                    Demo data has been generated successfully! Click the button below to start exploring APM features.
+                </div>
+                <a class="btn-success" href="http://localhost:8066/" data-i18n="enterApm">👉 Open APM Dashboard</a>
+            </div>
+
+            <div class="section-divider" data-i18n="orDivider">or</div>
+
+            <!-- Entry from the Data Mock page for experienced users -->
+            <div style="text-align:center">
+                <a href="prism-explorer-data.html" style="color:#64748b;font-size:13px;text-decoration:none;transition:color 0.2s;"
+                   onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'" data-i18n="advancedOptions">
+                    Advanced: regenerate or clear data →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ── Initialize dates ──
+        (function() {
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById('startDateInput').value = today;
+            document.getElementById('endDateInput').value = today;
+        })();
+
+        let pollTimer = null;
+
+        // ── Render the view based on status ──
+        (function initView() {
+            fetch('/prism-explorer/api/mock/data-status')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.generated) {
+                        document.getElementById('sectionCards').style.display = '';
+                        document.getElementById('pageSubtitle').setAttribute('data-i18n', 'subtitleCards');
+                    } else {
+                        document.getElementById('sectionWizard').style.display = '';
+                        document.getElementById('pageSubtitle').setAttribute('data-i18n', 'subtitleWizard');
+                    }
+                    window.__applyI18n();
+                })
+                .catch(() => {
+                    // Show cards by default when the request fails.
+                    document.getElementById('sectionCards').style.display = '';
+                });
+        })();
+
+        // ── Start generation ──
+        document.getElementById('genBtn').addEventListener('click', () => {
+            const startDate = document.getElementById('startDateInput').value;
+            const endDate = document.getElementById('endDateInput').value;
+            const params = new URLSearchParams();
+            if (startDate) params.set('startDate', startDate);
+            if (endDate) params.set('endDate', endDate);
+
+            const container = document.getElementById('progressContainer');
+            const fill = document.getElementById('progressFill');
+            const label = document.getElementById('progressLabel');
+            const result = document.getElementById('result');
+            const genBtn = document.getElementById('genBtn');
+
+            genBtn.disabled = true;
+            result.textContent = '';
+            result.style.display = 'none';
+            container.style.display = 'block';
+            fill.style.width = '0%';
+            label.textContent = window.__('starting');
+
+            fetch('/prism-explorer/api/mock/data?' + params.toString(), { method: 'POST' })
+                .then(r => r.json())
+                .then(genData => {
+                    const taskId = genData.taskId;
+                    if (genData.done) {
+                        onComplete(genData);
+                        return;
+                    }
+                    pollTimer = setInterval(async () => {
+                        try {
+                            const res = await fetch('/prism-explorer/api/mock/progress?taskId=' + encodeURIComponent(taskId));
+                            const data = await res.json();
+                            const totalScripts = data.totalScripts || 1;
+                            const scriptIdx = Math.min(data.currentScriptIndex || 0, totalScripts);
+                            const pct = Math.min(Math.round((scriptIdx / totalScripts) * 100), 100);
+                            fill.style.width = pct + '%';
+                            label.textContent = window.__t(data.message || '');
+                            if (data.done) {
+                                onComplete(data);
+                            }
+                        } catch (e) {
+                            cleanupPoll();
+                            genBtn.disabled = false;
+                            result.textContent = window.__('pollFailed') + e.message;
+                            result.style.display = '';
+                        }
+                    }, 300);
+                })
+                .catch(e => {
+                    genBtn.disabled = false;
+                    result.textContent = window.__('requestFailed') + e.message;
+                    result.style.display = '';
+                });
+        });
+
+        function onComplete(data) {
+            cleanupPoll();
+            document.getElementById('genBtn').disabled = false;
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('result').textContent = data.messageIsLong ? data.message : (data.message ? window.__t(data.message) : JSON.stringify(data, null, 2));
+            document.getElementById('result').style.display = '';
+
+            // Switch the page view: hide wizard step 1 and show step 2.
+            document.getElementById('stepGenerate').style.display = 'none';
+            document.getElementById('stepEnter').style.display = '';
+        }
+
+        function cleanupPoll() {
+            if (pollTimer) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+            }
+        }
+    </script>
+    <script src="i18n.js"></script>
+</body>
+</html>

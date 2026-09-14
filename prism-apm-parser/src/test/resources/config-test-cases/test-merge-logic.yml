@@ -1,0 +1,49 @@
+version: 1.0-merge-test
+parser:
+  componentDefinitions:
+    - name: "component-A"
+      match:
+        - key: "A"
+      outputs:
+        actionName:
+          vals:
+            - "component-A-action"
+        targetName:
+          vals:
+            - "component-A-target"
+        spanKind:
+          defaultVal: "component-A-kind"
+        error:
+          defaultVal: "1" # This should NOT be overwritten
+
+    - name: "component-B"
+      match:
+        - key: "B"
+      outputs:
+        targetName:
+          vals:
+            - "component-B-target"
+
+    # Scenario 4: Component with no 'outputs' section
+    - name: "component-C"
+      match:
+        - key: "C"
+
+    # Scenario 5: Component with null 'outputs' section
+    - name: "component-D"
+      match:
+        - key: "D"
+      outputsp :
+
+  defaults:
+    outputs:
+      serviceName:
+        vals:
+          - "default-service"
+      actionName:
+        vals:
+          - "default-action"
+      component:
+        defaultVal: "default-component"
+      error:
+        defaultVal: "0" # This should be ignored by component-A

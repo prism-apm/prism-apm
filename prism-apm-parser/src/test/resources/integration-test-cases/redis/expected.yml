@@ -1,0 +1,55 @@
+-
+  time: "2025-08-21T06:40:01.464608Z"
+  spanId: "84e2c588dd9bd8f5"
+  traceId: "630014457c1749bde4d2613384e9184f"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/middleware"
+  remoteAddr: "172.18.0.17"
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 519847
+  cnt: 1
+  error: 0
+
+-
+  time: "2025-08-21T06:40:01.979177Z"
+  spanId: "124f9e4a425fe497"
+  traceId: "630014457c1749bde4d2613384e9184f"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "io.opentelemetry.lettuce-5.1"
+  systemType: "redis"
+  actionName: "SET"
+  targetName: "SET"
+  remoteAddr: "span-redis"
+
+  caller_time: "2025-08-21T06:40:01.464608Z"
+  caller_spanId: "84e2c588dd9bd8f5"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/middleware"
+  caller_remoteAddr: "172.18.0.17"
+
+  duration: 3583
+  cnt: 1
+  error: 0

@@ -1,0 +1,27 @@
+-
+  time: "2025-08-21T07:49:50.263117Z"
+  spanId: "d0b0983f5079ec57"
+  traceId: "97feca68961ed2552e296b160bf1b810"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 1
+  component: "io.opentelemetry.spring-scheduling-3.1"
+  systemType: "spring-schedule"
+  actionName: ""
+  targetName: "MiddlewareController.executeTask"
+  remoteAddr: ""
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 334
+  cnt: 1
+  error: 0

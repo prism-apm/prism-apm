@@ -1,0 +1,54 @@
+services:
+  timescaledb:
+    image: timescale/timescaledb-ha:pg16.13-ts2.25.1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "15432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  prism-explorer:
+    build:
+      context: ..
+      dockerfile: prism-explorer/Dockerfile
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8091/prism-explorer/api/mock/status | grep -q '\"initDone\":true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 60
+      start_period: 15s
+    restart: unless-stopped
+
+  ui-server:
+    build:
+      context: ..
+      dockerfile: prism-explorer/Dockerfile.ui-server
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CONFIG_ADDITIONAL_LOCATION: optional:file:/app/application-docker.properties
+    depends_on:
+      prism-explorer:
+        condition: service_healthy
+      timescaledb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  ui:
+    build:
+      context: ..
+      dockerfile: prism-explorer/Dockerfile.ui
+    ports:
+      - "80:80"
+      - "8066:8066"
+    depends_on:
+      - ui-server
+    restart: unless-stopped

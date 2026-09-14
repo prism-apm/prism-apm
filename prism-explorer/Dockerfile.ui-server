@@ -1,0 +1,8 @@
+FROM eclipse-temurin:21-jre
+
+COPY prism-apm-ui-server/target/*.jar /app/prism-apm-query.jar
+COPY prism-explorer/application-docker.properties /app/application-docker.properties
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "/app/prism-apm-query.jar"]

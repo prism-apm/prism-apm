@@ -1,0 +1,174 @@
+# Compatible with Semantic conventions X v1.37 and earlier
+version: 1.0
+parser:
+  # Component definition list; the parser matches in order
+  componentDefinitions:
+
+    # Definition: component name or type definition
+    - name: "spring-schedule"
+      match:
+        - spans-scope__name: "io.opentelemetry.spring-scheduling-.+"
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes__NON_EXIST_ATTRIBUTE"
+          defaultVal: ""
+        targetName:
+          vals:
+            - "span__name"
+        systemType:
+          vals:
+            - "span-attributes__NON_EXIST_ATTRIBUTE"
+          defaultVal: "spring-schedule"
+
+    # The ES component must be placed before the http component type.
+    # The Java ES client implementation uses the HTTP protocol. If placed after http, it will be treated as an http component and system_type will be http instead of ES-related content.
+    - name: "database-elastic"
+      match:
+        - span-attributes__db.system: "elasticsearch"
+        - span-attributes__db.system.name: "elasticsearch"
+
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes__db.operation.name"
+            - "span-attributes__db.operation"
+            - "span__name"
+        targetName:
+          vals:
+            # For Version 7.17.20+ through 7.x and 8.10 and later (native implementation).
+            - "span-attributes__db.statement"
+            # For other version (opentelemetry instrumentation).
+            - "span-attributes__db.query.text"
+            - "span-attributes__url.full"
+        systemType:
+          vals:
+            - "span-attributes__db.system.name"
+            - "span-attributes__db.system"
+
+
+    # Redis
+    # This component must be placed before the database component. If placed after it, Redis-related spans will match the database conditions.
+    - name: "redis"
+      match:
+        - span-attributes__db.system.name: "redis"
+        - span-attributes__db.system: "redis"
+
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes__db.operation.name"
+            - "span-attributes__db.operation"
+            - "span__name"
+        targetName:
+          vals:
+            - "span-attributes__db.operation.name"
+            - "span-attributes__db.operation"
+            - "span__name"
+        systemType:
+          vals:
+            - "span-attributes__db.system.name"
+            - "span-attributes__db.system"
+
+
+    # database type components
+    - name: "database"
+      match:
+        - span-attributes__db.system: ".*"
+        - span-attributes__db.system.name: ".*"
+
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes__db.operation.name"
+            - "span-attributes__db.operation"
+            - "span__name"
+        targetName:
+          vals:
+            - "span-attributes__db.query.text"
+        systemType:
+          vals:
+            - "span-attributes__db.system.name"
+            - "span-attributes__db.system"
+
+    # message type components: kafka, Rocketmq...
+    - name: "message"
+      match:
+        - span-attributes__messaging.system: ".*"
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes__messaging.operation.name"
+            - "span-attributes__messaging.operation"
+        targetName:
+          vals:
+            - "span-attributes__messaging.destination.name"
+        systemType:
+          vals:
+            - "span-attributes__messaging.system"
+
+    # message type components: gPRC, Thrift...
+    - name: "RPC"
+      match:
+        - span-attributes__rpc.system: ".*"
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes__NON_EXIST_ATTRIBUTE"
+          defaultVal: ""
+        targetName:
+          vals:
+            - "span__name"
+        systemType:
+          vals:
+            - "span-attributes__rpc.system"
+
+
+    # message type components: http client or component that implemented with http protocol
+    - name: "http"
+      match:
+        - span-attributes__http.request.method: ".*"
+      outputs:
+        actionName:
+          vals:
+            - "span-attributes__http.request.method"
+        targetName:
+          vals:
+            - "span-attributes__http.route"
+            - "span-attributes__url.path"
+            - "span-attributes__url.full"
+        systemType:
+          vals:
+            - "span-attributes__NON_EXIST_ATTRIBUTE"
+          defaultVal: "http"
+
+  # global default setting
+  defaults:
+    outputs:
+      serviceName:
+        vals:
+          - "resource-attributes__service.name"
+      hostName:
+        vals:
+          - "resource-attributes__host.name"
+        defaultVal: "unknown"
+      spanKind:
+        vals:
+          - "span__kind"
+      actionName:
+        vals:
+          - "span__name"
+        defaultVal: ""
+      targetName:
+        vals:
+          - "span__name"
+        defaultVal: ""
+      component:
+        vals:
+          - "spans-scope__name"
+      systemType:
+        defaultVal: "unknown"
+      error:
+        vals:
+          - "span__status__code"
+        defaultVal: "0"

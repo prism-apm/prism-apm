@@ -1,0 +1,84 @@
+-
+  time: "2025-08-21T07:33:45.863567Z"
+  spanId: "9d44ba944ea32bef"
+  traceId: "52912384f571fbdc7a1512330f30d6e7"
+  serviceName: "feign-consumer"
+  hostName: "sample-consumer-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/grpc/hello"
+  remoteAddr: "172.18.0.1"
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 1096693
+  cnt: 1
+  error: 0
+
+-
+  time: "2025-08-21T07:33:45.880196Z"
+  spanId: "cfb2d52e5c106d1e"
+  traceId: "52912384f571fbdc7a1512330f30d6e7"
+  serviceName: "feign-consumer"
+  hostName: "sample-consumer-v2"
+  spanKind: 3
+  component: "io.opentelemetry.grpc-1.6"
+  systemType: "grpc"
+  actionName: ""
+  targetName: "grpc.Greeter/SayHello"
+  remoteAddr: "hello-service"
+  caller_time: "2025-08-21T07:33:45.863567Z"
+
+  caller_spanId: "9d44ba944ea32bef"
+  caller_serviceName: "feign-consumer"
+  caller_hostName: "sample-consumer-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/grpc/hello"
+  caller_remoteAddr: "172.18.0.1"
+
+  duration: 1075737
+  cnt: 1
+  error: 0
+
+
+- 
+  time: "2025-08-21T07:33:46.833152Z"
+  spanId: "14dd184dbcf1847a"
+  traceId: "52912384f571fbdc7a1512330f30d6e7"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 2
+  component: "io.opentelemetry.grpc-1.6"
+  systemType: "grpc"
+  actionName: ""
+  targetName: "grpc.Greeter/SayHello"
+  remoteAddr: "172.18.0.17"
+
+  caller_time: "2025-08-21T07:33:45.880196Z"
+  caller_spanId: "cfb2d52e5c106d1e"
+  caller_serviceName: "feign-consumer"
+  caller_hostName: "sample-consumer-v2"
+  caller_spanKind: 3
+  caller_component: "io.opentelemetry.grpc-1.6"
+  caller_systemType: "grpc"
+  caller_actionName: ""
+  caller_targetName: "grpc.Greeter/SayHello"
+  caller_remoteAddr: "hello-service"
+
+  duration: 96147
+  cnt: 1
+  error: 0

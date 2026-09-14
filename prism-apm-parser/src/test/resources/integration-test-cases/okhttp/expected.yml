@@ -1,0 +1,83 @@
+-
+  time: "2025-08-21T07:26:21.094522Z"
+  spanId: "54f50705be4e7303"
+  traceId: "dcb0e2066c725da59bcba78ef8941974"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/middleware"
+  remoteAddr: "172.18.0.17"
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 1414774
+  cnt: 1
+  error: 0
+
+-
+  time: "2025-08-21T07:26:21.557970Z"
+  spanId: "d641e6b3213b2509"
+  traceId: "dcb0e2066c725da59bcba78ef8941974"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "io.opentelemetry.okhttp-3.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "https://www.github.com/"
+  remoteAddr: "www.github.com"
+
+  caller_time: "2025-08-21T07:26:21.094522Z"
+  caller_spanId: "54f50705be4e7303"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/middleware"
+  caller_remoteAddr: "172.18.0.17"
+
+  duration: 241090
+  cnt: 1
+  error: 0
+
+- 
+  time: "2025-08-21T07:26:21.805353Z"
+  spanId: "2aeefe77454e5ef6"
+  traceId: "dcb0e2066c725da59bcba78ef8941974"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "io.opentelemetry.okhttp-3.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "https://github.com/"
+  remoteAddr: "github.com"
+
+  caller_time: "2025-08-21T07:26:21.094522Z"
+  caller_spanId: "54f50705be4e7303"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/middleware"
+  caller_remoteAddr: "172.18.0.17"
+
+  duration: 244260
+  cnt: 1
+  error: 0

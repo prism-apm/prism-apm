@@ -1,0 +1,113 @@
+- 
+  time: "2025-08-21T07:22:25.469756Z"
+  spanId: "dbd75f6faa2db7e4"
+  traceId: "72f724c8236a7f5356edf7ea954c474f"
+  serviceName: "feign-consumer"
+  hostName: "sample-consumer-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/mongo/search"
+  remoteAddr: "172.18.0.1"
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 52658
+  cnt: 1
+  error: 0
+
+- 
+  time: "2025-08-21T07:22:25.472629Z"
+  spanId: "933a17048ba5d89b"
+  traceId: "72f724c8236a7f5356edf7ea954c474f"
+  serviceName: "feign-consumer"
+  hostName: "sample-consumer-v2"
+  spanKind: 3
+  component: "io.opentelemetry.http-url-connection"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "http://172.18.0.16:9001/middleware?middlewareName=mongo&operation=search"
+  remoteAddr: "172.18.0.16"
+
+  caller_time: "2025-08-21T07:22:25.469756Z"
+  caller_spanId: "dbd75f6faa2db7e4"
+  caller_serviceName: "feign-consumer"
+  caller_hostName: "sample-consumer-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/mongo/search"
+  caller_remoteAddr: "172.18.0.1"
+
+  duration: 47901
+  cnt: 1
+  error: 0
+
+
+- 
+  time: "2025-08-21T07:22:25.473422Z"
+  spanId: "d3fa559677be0ae5"
+  traceId: "72f724c8236a7f5356edf7ea954c474f"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/middleware"
+  remoteAddr: "172.18.0.17"
+
+  caller_time: "2025-08-21T07:22:25.472629Z"
+  caller_spanId: "933a17048ba5d89b"
+  caller_serviceName: "feign-consumer"
+  caller_hostName: "sample-consumer-v2"
+  caller_spanKind: 3
+  caller_component: "io.opentelemetry.http-url-connection"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "http://172.18.0.16:9001/middleware?middlewareName=mongo&operation=search"
+  caller_remoteAddr: "172.18.0.16"
+
+  duration: 47161
+  cnt: 1
+  error: 0
+
+
+- 
+  time: "2025-08-21T07:22:25.498379Z"
+  spanId: "0c34fa1c8b3aa475"
+  traceId: "72f724c8236a7f5356edf7ea954c474f"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "io.opentelemetry.mongo-3.1"
+  systemType: "mongodb"
+  actionName: "find"
+  targetName: "{\"find\": \"user\", \"filter\": {\"userName\": \"?\"}, \"limit\": \"?\", \"singleBatch\": \"?\", \"$db\": \"?\", \"lsid\": {\"id\": \"?\"}}"
+  remoteAddr: "span-mongodb"
+
+  caller_time: "2025-08-21T07:22:25.473422Z"
+  caller_spanId: "d3fa559677be0ae5"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/middleware"
+  caller_remoteAddr: "172.18.0.17"
+
+  duration: 5813
+  cnt: 1
+  error: 0

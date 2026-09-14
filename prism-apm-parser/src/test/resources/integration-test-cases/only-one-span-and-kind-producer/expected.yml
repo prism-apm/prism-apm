@@ -1,0 +1,27 @@
+-
+  time: "2025-08-21T07:28:12.267886Z"
+  spanId: "f1a5b71e53e51e8a"
+  traceId: "389df17adcde933e7235de6d5e1a8c03"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 4
+  component: "io.opentelemetry.kafka-clients-0.11"
+  systemType: "kafka"
+  actionName: "publish"
+  targetName: "test-topic"
+  remoteAddr: ""
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 260751
+  cnt: 1
+  error: 0

@@ -1,0 +1,55 @@
+-
+  time: "2025-08-21T07:29:19.247129Z"
+  spanId: "2120dff28455e48e"
+  traceId: "c0c7ba6ac6e548b967f71e92a623649a"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/middleware"
+  remoteAddr: "172.18.0.17"
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 187700
+  cnt: 1
+  error: 0
+
+-
+  time: "2025-08-21T07:29:19.250532Z"
+  spanId: "38882df23d234a01"
+  traceId: "c0c7ba6ac6e548b967f71e92a623649a"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "io.opentelemetry.jdbc"
+  systemType: "mysql"
+  actionName: "INSERT"
+  targetName: "insert into user ( id, nickname, mobile, password, role, create_time, update_time ) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  remoteAddr: "span-mysql"
+  
+  caller_time: "2025-08-21T07:29:19.247129Z"
+  caller_spanId: "2120dff28455e48e"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/middleware"
+  caller_remoteAddr: "172.18.0.17"
+
+  duration: 21670
+  cnt: 1
+  error: 2

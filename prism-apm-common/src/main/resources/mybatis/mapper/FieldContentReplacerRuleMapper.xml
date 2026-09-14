@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.prism.apm.common.repository.FieldContentReplacerRuleMapper">
+  <resultMap id="BaseResultMap" type="org.prism.apm.common.model.entity.FieldContentReplacerRuleEntity">
+    <!--@Table field_content_replacer_rule-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="service_name" jdbcType="VARCHAR" property="serviceName" />
+    <result column="component" jdbcType="VARCHAR" property="component" />
+    <result column="span_kind" jdbcType="SMALLINT" property="spanKind" />
+    <result column="field_name" jdbcType="VARCHAR" property="fieldName" />
+    <result column="match_type" jdbcType="VARCHAR" property="matchType" />
+    <result column="search_content" jdbcType="VARCHAR" property="searchContent" />
+    <result column="replacement" jdbcType="VARCHAR" property="replacement" />
+    <result column="enabled" jdbcType="BOOLEAN" property="enabled" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, service_name, component, span_kind, field_name, match_type, search_content, replacement, 
+    enabled
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from field_content_replacer_rule
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from field_content_replacer_rule
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="org.prism.apm.common.model.entity.FieldContentReplacerRuleEntity">
+    insert into field_content_replacer_rule (service_name, component, 
+      span_kind, field_name, match_type, 
+      search_content, replacement, enabled
+      )
+    values (#{serviceName,jdbcType=VARCHAR}, #{component,jdbcType=VARCHAR}, 
+      #{spanKind,jdbcType=SMALLINT}, #{fieldName,jdbcType=VARCHAR}, #{matchType,jdbcType=VARCHAR}, 
+      #{searchContent,jdbcType=VARCHAR}, #{replacement,jdbcType=VARCHAR}, #{enabled,jdbcType=BOOLEAN}
+      )
+  </insert>
+  <insert id="insertSelective" useGeneratedKeys="true" keyProperty="id" parameterType="org.prism.apm.common.model.entity.FieldContentReplacerRuleEntity">
+    insert into field_content_replacer_rule
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="serviceName != null">
+        service_name,
+      </if>
+      <if test="component != null">
+        component,
+      </if>
+      <if test="spanKind != null">
+        span_kind,
+      </if>
+      <if test="fieldName != null">
+        field_name,
+      </if>
+      <if test="matchType != null">
+        match_type,
+      </if>
+      <if test="searchContent != null">
+        search_content,
+      </if>
+      <if test="replacement != null">
+        replacement,
+      </if>
+      <if test="enabled != null">
+        enabled,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="serviceName != null">
+        #{serviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="component != null">
+        #{component,jdbcType=VARCHAR},
+      </if>
+      <if test="spanKind != null">
+        #{spanKind,jdbcType=SMALLINT},
+      </if>
+      <if test="fieldName != null">
+        #{fieldName,jdbcType=VARCHAR},
+      </if>
+      <if test="matchType != null">
+        #{matchType,jdbcType=VARCHAR},
+      </if>
+      <if test="searchContent != null">
+        #{searchContent,jdbcType=VARCHAR},
+      </if>
+      <if test="replacement != null">
+        #{replacement,jdbcType=VARCHAR},
+      </if>
+      <if test="enabled != null">
+        #{enabled,jdbcType=BOOLEAN},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="org.prism.apm.common.model.entity.FieldContentReplacerRuleEntity">
+    update field_content_replacer_rule
+    <set>
+      <if test="serviceName != null">
+        service_name = #{serviceName,jdbcType=VARCHAR},
+      </if>
+      <if test="component != null">
+        component = #{component,jdbcType=VARCHAR},
+      </if>
+      <if test="spanKind != null">
+        span_kind = #{spanKind,jdbcType=SMALLINT},
+      </if>
+      <if test="fieldName != null">
+        field_name = #{fieldName,jdbcType=VARCHAR},
+      </if>
+      <if test="matchType != null">
+        match_type = #{matchType,jdbcType=VARCHAR},
+      </if>
+      <if test="searchContent != null">
+        search_content = #{searchContent,jdbcType=VARCHAR},
+      </if>
+      <if test="replacement != null">
+        replacement = #{replacement,jdbcType=VARCHAR},
+      </if>
+      <if test="enabled != null">
+        enabled = #{enabled,jdbcType=BOOLEAN},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="org.prism.apm.common.model.entity.FieldContentReplacerRuleEntity">
+    update field_content_replacer_rule
+    set service_name = #{serviceName,jdbcType=VARCHAR},
+      component = #{component,jdbcType=VARCHAR},
+      span_kind = #{spanKind,jdbcType=SMALLINT},
+      field_name = #{fieldName,jdbcType=VARCHAR},
+      match_type = #{matchType,jdbcType=VARCHAR},
+      search_content = #{searchContent,jdbcType=VARCHAR},
+      replacement = #{replacement,jdbcType=VARCHAR},
+      enabled = #{enabled,jdbcType=BOOLEAN}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+<!--auto generated by MybatisCodeHelper on 2024-10-31-->
+  <select id="selectByAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from field_content_replacer_rule
+        <where>
+            <if test="id != null">
+                and id=#{id,jdbcType=INTEGER}
+            </if>
+            <if test="serviceName != null">
+                and service_name=#{serviceName,jdbcType=VARCHAR}
+            </if>
+            <if test="component != null">
+                and component=#{component,jdbcType=VARCHAR}
+            </if>
+            <if test="spanKind != null">
+                and span_kind=#{spanKind,jdbcType=VARCHAR}
+            </if>
+            <if test="fieldName != null">
+                and field_name=#{fieldName,jdbcType=VARCHAR}
+            </if>
+            <if test="matchType != null">
+                and match_type=#{matchType,jdbcType=VARCHAR}
+            </if>
+            <if test="searchContent != null">
+                and search_content=#{searchContent,jdbcType=VARCHAR}
+            </if>
+            <if test="replacement != null">
+                and replacement=#{replacement,jdbcType=VARCHAR}
+            </if>
+            <if test="enabled != null">
+                and enabled=#{enabled,jdbcType=BOOLEAN}
+            </if>
+        </where>
+    </select>
+</mapper>

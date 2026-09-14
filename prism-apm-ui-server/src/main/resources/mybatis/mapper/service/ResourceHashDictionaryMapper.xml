@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.prism.apm.ui.server.mapper.service.ResourceHashDictionaryMapper">
+
+    <resultMap id="BaseResultMap" type="org.prism.apm.ui.server.entity.db.ResourceHashDictionary">
+        <result column="hash_key" property="hashKey"/>
+        <result column="category" property="category"/>
+        <result column="algorithm" property="algorithm"/>
+        <result column="text_value" property="textValue"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <!-- Batch query resource dictionary -->
+    <select id="batchQuery" resultMap="BaseResultMap">
+        SELECT
+            hash_key,
+            category,
+            algorithm,
+            text_value,
+            create_time
+        FROM resource_hash_dictionary
+        WHERE category = #{category}
+        <if test="hashKeys != null and hashKeys.size() > 0">
+            AND hash_key IN
+            <foreach collection="hashKeys" item="hashKey" open="(" separator="," close=")">
+                #{hashKey}::uuid
+            </foreach>
+        </if>
+    </select>
+
+</mapper>

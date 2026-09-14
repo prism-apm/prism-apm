@@ -1,0 +1,55 @@
+- 
+  time: "2025-08-21T07:22:25.473422Z"
+  spanId: "d3fa559677be0ae5"
+  traceId: "72f724c8236a7f5356edf7ea954mongo"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 2
+  component: "io.opentelemetry.tomcat-10.0"
+  systemType: "GET"
+  actionName: "GET"
+  targetName: "/middleware"
+  remoteAddr: "172.18.0.17"
+
+  caller_time: "1970-01-01T00:00:00.000000Z"
+  caller_spanId: ""
+  caller_serviceName: ""
+  caller_hostName: ""
+  caller_spanKind: 0
+  caller_component: ""
+  caller_systemType: ""
+  caller_actionName: ""
+  caller_targetName: ""
+  caller_remoteAddr: ""
+
+  duration: 47161
+  cnt: 1
+  error: 0
+
+- 
+  time: "2025-08-21T07:22:25.498379Z"
+  spanId: "0c34fa1c8b3aa475"
+  traceId: "72f724c8236a7f5356edf7ea954mongo"
+  serviceName: "hello-service"
+  hostName: "sample-provider-v2"
+  spanKind: 3
+  component: "io.opentelemetry.mongo-3.1"
+  systemType: "mongodb"
+  actionName: "find"
+  targetName: "{\"find\": \"user\", \"filter\": {\"userName\": \"?\"}, \"limit\": \"?\", \"singleBatch\": \"?\", \"$db\": \"?\", \"lsid\": {\"id\": \"?\"}}"
+  remoteAddr: "span-mongodb"
+
+  caller_time: "2025-08-21T07:22:25.473422Z"
+  caller_spanId: "d3fa559677be0ae5"
+  caller_serviceName: "hello-service"
+  caller_hostName: "sample-provider-v2"
+  caller_spanKind: 2
+  caller_component: "io.opentelemetry.tomcat-10.0"
+  caller_systemType: "GET"
+  caller_actionName: "GET"
+  caller_targetName: "/middleware"
+  caller_remoteAddr: "172.18.0.17"
+
+  duration: 5813
+  cnt: 1
+  error: 0

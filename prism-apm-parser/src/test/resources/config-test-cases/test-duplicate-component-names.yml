@@ -1,0 +1,12 @@
+version: 1.0
+parser:
+  componentDefinitions:
+    - name: "database"
+      match:
+        - span-attributes__db.system: ".*"
+    - name: "http"
+      match:
+        - span-attributes__http.request.method: ".*"
+    - name: "database" # Duplicate name
+      match:
+        - span-attributes__db.system: "postgres"

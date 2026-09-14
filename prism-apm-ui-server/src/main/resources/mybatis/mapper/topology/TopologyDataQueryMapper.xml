@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.prism.apm.ui.server.mapper.topology.TopologyDataQueryMapper">
+
+    <select id="selectRpc" resultType="org.prism.apm.ui.server.entity.model.topology.ServiceTopologyRelationView">
+        SELECT caller_service_name, service_name
+        FROM ${routeInfo.dynamicTableName}
+        WHERE (
+        caller_service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        AND service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        )
+        AND span_kind = 2
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        GROUP BY caller_service_name, service_name
+    </select>
+
+    <select id="selectJdbc" resultType="org.prism.apm.ui.server.entity.model.topology.ServiceTopologyRelationView">
+        SELECT caller_service_name, remote_addr as service_name
+        FROM ${routeInfo.dynamicTableName}
+        WHERE (
+        caller_service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        AND service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        )
+        AND system_type = 'mysql'
+        AND span_kind = 3
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        GROUP BY caller_service_name, remote_addr
+    </select>
+
+    <select id="selectRedis" resultType="org.prism.apm.ui.server.entity.model.topology.ServiceTopologyRelationView">
+        SELECT caller_service_name, remote_addr as service_name
+        FROM ${routeInfo.dynamicTableName}
+        WHERE (
+        caller_service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        AND service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        )
+        AND system_type = 'redis'
+        AND span_kind = 3
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        GROUP BY caller_service_name, remote_addr
+    </select>
+
+    <select id="selectMqProducer" resultType="org.prism.apm.ui.server.entity.model.topology.ServiceTopologyRelationView">
+        SELECT caller_service_name, service_name, system_type
+        FROM ${routeInfo.dynamicTableName}
+        WHERE (
+        caller_service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        AND service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        )
+        AND system_type IN ('kafka', 'rocketmq')
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        AND span_kind = 4
+        GROUP BY caller_service_name, service_name, system_type
+    </select>
+
+    <select id="selectMqConsumer" resultType="org.prism.apm.ui.server.entity.model.topology.ServiceTopologyRelationView">
+        SELECT caller_service_name, service_name, system_type
+        FROM ${routeInfo.dynamicTableName}
+        WHERE (
+        caller_service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        AND service_name IN
+        <foreach collection="serviceList" item="serviceName" open="(" close=")" separator=",">
+            #{serviceName}
+        </foreach>
+        )
+        AND system_type IN ('kafka', 'rocketmq')
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        AND span_kind = 5
+        GROUP BY caller_service_name, service_name, system_type
+    </select>
+
+    <!--suppress SqlUnused -->
+    <select id="selectServicesAboveThreshold" resultType="java.lang.String">
+        <!-- Use a CTE to virtually merge data from the two tables first -->
+        WITH combined_metrics AS (
+        SELECT time, service_name, cnt, avg_duration, max_duration, min_duration, error_num, percent_duration
+        FROM service_call_minute_entry
+        WHERE service_name = #{serviceName}
+        <![CDATA[ AND time >= #{start}::timestamp AND time < #{end}::timestamp ]]>
+
+        UNION ALL
+
+        SELECT time, service_name, cnt, avg_duration, max_duration, min_duration, error_num, percent_duration
+        FROM service_call_minute_dependency
+        WHERE service_name = #{serviceName}
+        <![CDATA[
+        AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        )
+        SELECT service_name
+        FROM (
+        SELECT
+        time_bucket(INTERVAL '1M', time) AS one_min_time,
+        service_name,
+        SUM(cnt) AS cnt,
+        AVG(avg_duration) AS avg_duration,
+        MAX(max_duration) AS max_duration,
+        MIN(min_duration) AS min_duration,
+        SUM(error_num) AS error_num
+        <if test="threshold.contains('p90_duration')">
+            , approx_percentile(0.90, rollup(percent_duration)) AS p90_duration
+        </if>
+        <if test="threshold.contains('p95_duration')">
+            , approx_percentile(0.95, rollup(percent_duration)) AS p95_duration
+        </if>
+        <if test="threshold.contains('p99_duration')">
+            , approx_percentile(0.99, rollup(percent_duration)) AS p99_duration
+        </if>
+        FROM combined_metrics
+        GROUP BY time_bucket(INTERVAL '1M', time), service_name
+        ) AS aggregated_data
+        WHERE
+        ${threshold}
+        LIMIT 1
+    </select>
+
+    <select id="selectOverThresholdDownstream"
+            resultType="org.prism.apm.ui.server.entity.model.topology.ServiceTopologyRelationView">
+        WITH combined_metrics AS (SELECT time,
+                                         caller_service_name,
+                                         service_name,
+                                         system_type,
+                                         span_kind,
+                                         remote_addr,
+                                         cnt,
+                                         avg_duration,
+                                         max_duration,
+                                         min_duration,
+                                         error_num,
+                                         percent_duration
+                                  FROM service_call_minute_entry
+                                  WHERE caller_service_name in (${serviceName})
+                                    AND (system_type in ('mysql', 'redis', 'kafka', 'rocketmq') or span_kind = 2)
+            <![CDATA[
+                                    AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+
+        UNION ALL
+
+                                  SELECT time,
+                                         caller_service_name,
+                                         service_name,
+                                         system_type,
+                                         span_kind,
+                                         remote_addr,
+                                         cnt,
+                                         avg_duration,
+                                         max_duration,
+                                         min_duration,
+                                         error_num,
+                                         percent_duration
+                                  FROM service_call_minute_dependency
+                                  WHERE caller_service_name in (${serviceName})
+                                    AND (system_type in ('mysql', 'redis', 'kafka', 'rocketmq') or span_kind = 2)
+        <![CDATA[
+                                    AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        )
+        SELECT caller_service_name,
+               CASE
+                   WHEN system_type IN ('mysql', 'redis') THEN remote_addr
+                   ELSE service_name
+                   END                                           AS service_name,
+               system_type,
+               SUM(cnt)                                          AS cnt,
+               AVG(avg_duration)                                 AS avg_duration,
+               MAX(max_duration)                                 AS max_duration,
+               MIN(min_duration)                                 AS min_duration,
+               SUM(error_num)                                    AS error_num,
+               approx_percentile(0.90, rollup(percent_duration)) AS p90_duration,
+               approx_percentile(0.95, rollup(percent_duration)) AS p95_duration,
+               approx_percentile(0.99, rollup(percent_duration)) AS p99_duration
+        FROM combined_metrics
+        GROUP BY caller_service_name,
+                 CASE
+                     WHEN system_type IN ('mysql', 'redis') THEN remote_addr
+                     ELSE service_name
+                     END,
+                 system_type;
+    </select>
+
+    <select id="selectOverThresholdUpstream"
+            resultType="org.prism.apm.ui.server.entity.model.topology.ServiceTopologyRelationView">
+        WITH combined_metrics AS (SELECT time,
+                                         caller_service_name,
+                                         service_name,
+                                         system_type,
+                                         span_kind,
+                                         cnt,
+                                         avg_duration,
+                                         max_duration,
+                                         min_duration,
+                                         error_num,
+                                         percent_duration
+                                  FROM service_call_minute_entry
+                                  WHERE service_name in (${serviceName})
+                                    AND span_kind = 2
+        <![CDATA[
+                                    AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+
+        UNION ALL
+
+                                  SELECT time,
+                                         caller_service_name,
+                                         service_name,
+                                         system_type,
+                                         span_kind,
+                                         cnt,
+                                         avg_duration,
+                                         max_duration,
+                                         min_duration,
+                                         error_num,
+                                         percent_duration
+                                  FROM service_call_minute_dependency
+                                  WHERE service_name in (${serviceName})
+                                    AND span_kind = 2
+            <![CDATA[
+                                    AND (time >= #{dateParam.startUTC}::TIMESTAMPTZ AND time < #{dateParam.endUTC}::TIMESTAMPTZ)
+        ]]>
+        )
+        SELECT caller_service_name,
+               service_name,
+               system_type,
+               SUM(cnt)                                          AS cnt,
+               AVG(avg_duration)                                 AS avg_duration,
+               MAX(max_duration)                                 AS max_duration,
+               MIN(min_duration)                                 AS min_duration,
+               SUM(error_num)                                    AS error_num,
+               approx_percentile(0.90, rollup(percent_duration)) AS p90_duration,
+               approx_percentile(0.95, rollup(percent_duration)) AS p95_duration,
+               approx_percentile(0.99, rollup(percent_duration)) AS p99_duration
+        FROM combined_metrics
+        GROUP BY caller_service_name, service_name, system_type;
+    </select>
+</mapper>

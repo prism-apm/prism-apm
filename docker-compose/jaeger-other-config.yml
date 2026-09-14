@@ -1,0 +1,69 @@
+# This config file includes two components: Ingester and Query
+service:
+  extensions: [jaeger_storage, jaeger_query, healthcheckv2]
+  pipelines:
+    traces:
+      receivers: [kafka]
+      processors: [batch]
+      exporters: [jaeger_storage_exporter]
+
+  telemetry:
+    resource:
+      service.name: jaeger-ingester-query
+    metrics:
+      level: detailed
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}"
+                port: "${env:PROMETHEUS_PORT:-8889}"
+    logs:
+      level: info
+
+extensions:
+  healthcheckv2:
+    use_v2: true
+    http:
+      endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:${env:HEALTH_CHECK_PORT:-13134}"
+
+  jaeger_storage:
+    backends:
+      es_store:
+        elasticsearch:
+          server_urls:
+            - "${env:ES_SERVER_URLS:-http://localhost:9200}"
+          indices:
+            index_prefix: "jaeger"
+            spans:
+              date_layout: "2006-01-02"
+              rollover_frequency: "day"
+              shards: 1
+              replicas: 0
+            services:
+              date_layout: "2006-01-02"
+              rollover_frequency: "day"
+              shards: 1
+              replicas: 0
+
+  jaeger_query:
+    storage:
+      traces: es_store
+    http:
+      endpoint: "${env:JAEGER_LISTEN_HOST:-0.0.0.0}:16686"
+
+receivers:
+  kafka:
+    brokers:
+      - "${env:KAFKA_BROKERS:-localhost:9092}"
+    topic: "${env:KAFKA_TOPIC:-opentelemetry-trace}"
+    encoding: otlp_json
+    group_id: "jaeger-ingesters"
+
+processors:
+  batch:
+
+exporters:
+  jaeger_storage_exporter:
+    trace_storage: es_store
+

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.2.5</version>
+	</parent>
+
+	<groupId>org.prism.apm</groupId>
+	<artifactId>prism-apm-parent</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+
+	<packaging>pom</packaging>
+
+	<name>prism-apm-parent</name>
+	<description>apm bom</description>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>https://www.apache.org/licenses/LICENSE-2.0</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<properties>
+		<java.version>21</java.version>
+		<spring-cloud.version>2023.0.1</spring-cloud.version>
+		<lombok.version>1.18.32</lombok.version>
+	</properties>
+
+
+	<modules>
+		<module>prism-apm-parser</module>
+		<module>prism-apm-ui-server</module>
+		<module>prism-apm-common</module>
+<!--		<module>sample-service</module>-->
+	</modules>
+
+	<!-- ★★★ 2. Add dependencyManagement to manage Spring Cloud versions consistently ★★★ -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombok.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<!-- ★★★ 3. Add the build section to manage plugins consistently, especially maven-compiler-plugin ★★★ -->
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.13.0</version>
+					<configuration>
+						<!-- Using the release tag is the best practice for configuring Java 21 -->
+						<release>${java.version}</release>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+</project>

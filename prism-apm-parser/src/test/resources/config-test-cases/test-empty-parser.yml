@@ -1,0 +1,3 @@
+version: 1.0-test
+parser:
+  # componentDefinitions and defaults are missing
