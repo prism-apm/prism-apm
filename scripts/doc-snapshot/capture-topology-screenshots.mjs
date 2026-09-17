@@ -15,7 +15,7 @@ import {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(__dirname, '../..');
 
 const DEFAULT_UI_URL = 'http://localhost:8066/';
 const DEFAULT_UI_LANG = 'zh-CN';
@@ -32,7 +32,7 @@ const SCREENSHOTS = [
 ];
 
 function usage(now = new Date()) {
-  return `Usage: node scripts/capture-topology-screenshots.mjs [options]
+  return `Usage: node scripts/doc-snapshot/capture-topology-screenshots.mjs [options]
 
 Options:
   --date YYYY-MM-DD             Generate a single mock data date.
@@ -41,7 +41,7 @@ Options:
   --explorer-url URL            Prism Explorer base URL. Default: ${DEFAULT_EXPLORER_URL}
   --ui-url URL                  Prism APM UI base URL. Default: ${DEFAULT_UI_URL}
   --ui-lang zh-CN|en-US         Prism APM UI screenshot language. Default: ${DEFAULT_UI_LANG}
-  --output DIR                  Screenshot output directory. Default: scripts/topology-shots
+  --output DIR                  Screenshot output directory. Default: scripts/doc-snapshot/topology-shots
   --browser-executable PATH     Chromium/Chrome executable path. Optional fallback for local Playwright installs.
   --skip-data                   Do not clear or generate Prism Explorer mock data. Existing Today topology data is required.
   --headed                      Run Chromium in headed mode.

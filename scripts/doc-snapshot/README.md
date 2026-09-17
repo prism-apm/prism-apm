@@ -59,7 +59,7 @@ poll task progress.
 Run from the repository root:
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs
 ```
 
 The default run does the following:
@@ -73,7 +73,7 @@ The default run does the following:
 Default output goes to:
 
 ```text
-scripts/quickstart-shots/
+scripts/doc-snapshot/quickstart-shots/
 ```
 
 The default output directory is ignored by Git and is intended for local review.
@@ -82,7 +82,7 @@ Prism Explorer screenshots default to Chinese. To capture the Prism Explorer
 pages and Prism APM UI pages in English instead, use:
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs --explorer-lang en --ui-lang en-US
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs --explorer-lang en --ui-lang en-US
 ```
 
 The language settings are written to the Playwright browser context before the
@@ -101,7 +101,7 @@ Playwright's default `navigator.language`.
 Run from the repository root:
 
 ```bash
-node scripts/capture-service-metrics-screenshots.mjs
+node scripts/doc-snapshot/capture-service-metrics-screenshots.mjs
 ```
 
 The default run does the following:
@@ -131,7 +131,7 @@ data, it prints this message to the terminal before failing with state details:
 Default output goes to:
 
 ```text
-scripts/service-metrics-shots/
+scripts/doc-snapshot/service-metrics-shots/
 ```
 
 The script captures:
@@ -149,19 +149,19 @@ The script captures:
 To overwrite the screenshots referenced by the service metrics documentation:
 
 ```bash
-node scripts/capture-service-metrics-screenshots.mjs --output docs/assets/zh-CN/features/service-metrics
+node scripts/doc-snapshot/capture-service-metrics-screenshots.mjs --output docs/assets/zh-CN/features/service-metrics
 ```
 
 To capture the APM UI in English, use:
 
 ```bash
-node scripts/capture-service-metrics-screenshots.mjs --ui-lang en-US
+node scripts/doc-snapshot/capture-service-metrics-screenshots.mjs --ui-lang en-US
 ```
 
 To overwrite the English service metrics documentation screenshots:
 
 ```bash
-node scripts/capture-service-metrics-screenshots.mjs --ui-lang en-US --output docs/assets/en/features/service-metrics
+node scripts/doc-snapshot/capture-service-metrics-screenshots.mjs --ui-lang en-US --output docs/assets/en/features/service-metrics
 ```
 
 ## Capture Topology Screenshots
@@ -169,7 +169,7 @@ node scripts/capture-service-metrics-screenshots.mjs --ui-lang en-US --output do
 Run from the repository root:
 
 ```bash
-node scripts/capture-topology-screenshots.mjs
+node scripts/doc-snapshot/capture-topology-screenshots.mjs
 ```
 
 The default run does the following:
@@ -185,13 +185,13 @@ the page loads so output is independent from your regular browser state. To
 capture the APM UI in English, use:
 
 ```bash
-node scripts/capture-topology-screenshots.mjs --ui-lang en-US
+node scripts/doc-snapshot/capture-topology-screenshots.mjs --ui-lang en-US
 ```
 
 Default output goes to:
 
 ```text
-scripts/topology-shots/
+scripts/doc-snapshot/topology-shots/
 ```
 
 The script captures `topology-overview.png`.
@@ -199,13 +199,13 @@ The script captures `topology-overview.png`.
 To overwrite screenshots for topology documentation assets:
 
 ```bash
-node scripts/capture-topology-screenshots.mjs --output docs/assets/zh-CN/features/topology
+node scripts/doc-snapshot/capture-topology-screenshots.mjs --output docs/assets/zh-CN/features/topology
 ```
 
 To overwrite the English topology documentation screenshot:
 
 ```bash
-node scripts/capture-topology-screenshots.mjs --ui-lang en-US --output docs/assets/en/features/topology
+node scripts/doc-snapshot/capture-topology-screenshots.mjs --ui-lang en-US --output docs/assets/en/features/topology
 ```
 
 ## Generated Files
@@ -248,20 +248,20 @@ twice the browser viewport size.
 To overwrite the screenshots referenced by the quickstart document:
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs --output docs/assets/zh-CN/quickstart
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs --output docs/assets/zh-CN/quickstart
 ```
 
 To overwrite the English quickstart screenshots:
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs --explorer-lang en --ui-lang en-US --output docs/assets/en/quickstart
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs --explorer-lang en --ui-lang en-US --output docs/assets/en/quickstart
 ```
 
 If you have already generated fresh mock data and only want to recapture the
 pages without clearing or generating data again:
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs --skip-data --output docs/assets/zh-CN/quickstart
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs --skip-data --output docs/assets/zh-CN/quickstart
 ```
 
 ## Validate Existing Screenshots
@@ -269,21 +269,21 @@ node scripts/capture-quickstart-screenshots.mjs --skip-data --output docs/assets
 Validate the default local output:
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs --validate-only
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs --validate-only
 ```
 
 Validate the documentation assets:
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs --validate-only --output docs/assets/zh-CN/quickstart
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs --validate-only --output docs/assets/zh-CN/quickstart
 ```
 
 ## Useful Options
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs --help
-node scripts/capture-service-metrics-screenshots.mjs --help
-node scripts/capture-topology-screenshots.mjs --help
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs --help
+node scripts/doc-snapshot/capture-service-metrics-screenshots.mjs --help
+node scripts/doc-snapshot/capture-topology-screenshots.mjs --help
 ```
 
 Common options:
@@ -304,7 +304,7 @@ Common options:
 ## Run Tests
 
 ```bash
-node --test scripts/capture-quickstart-screenshots.test.mjs
+node --test scripts/doc-snapshot/capture-quickstart-screenshots.test.mjs
 ```
 
 The tests do not open a browser or require Docker. They verify script-level
@@ -337,7 +337,7 @@ you run the service metrics script with `--skip-data` and the terminal prints:
 run the script without `--skip-data` first:
 
 ```bash
-node scripts/capture-service-metrics-screenshots.mjs
+node scripts/doc-snapshot/capture-service-metrics-screenshots.mjs
 ```
 
 This regenerates the default one-week mock dataset, ending with today.

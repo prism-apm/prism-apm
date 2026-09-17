@@ -288,7 +288,7 @@ UI Server 在默认 profile 下主要输出到控制台；启用 `prod` 或 `tes
 | 新增前端功能页面                      | 对应 `features/**` 文档                           |
 | 修改登录、权限或默认账号                  | `features/admin_feature.md` 和 UI Server 配置文档          |
 | 修改 Quickstart 或 Explorer 体验流程 | `getting-started.md`                          |
-| 更新文档截图                        | `docs/assets/**` 和 `scripts/README.md`        |
+| 更新文档截图                        | `docs/assets/**` 和 `scripts/doc-snapshot/README.md` |
 
 
 ## 文档截图
@@ -306,9 +306,9 @@ npx --prefix .doc-tools playwright install chromium
 常用命令：
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs
-node scripts/capture-service-metrics-screenshots.mjs
-node scripts/capture-topology-screenshots.mjs
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs
+node scripts/doc-snapshot/capture-service-metrics-screenshots.mjs
+node scripts/doc-snapshot/capture-topology-screenshots.mjs
 ```
 
 截图脚本默认会通过 Prism Explorer 清理并生成最近 7 天模拟数据，再登录 Prism APM UI 截图。已有合适数据时可以使用 `--skip-data`。

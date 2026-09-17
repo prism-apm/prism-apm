@@ -282,7 +282,7 @@ During development, update documentation when these areas change:
 | Add frontend feature page | Corresponding `features/**` doc |
 | Modify login, permissions, or default account | `features/admin_feature.md` and UI Server configuration docs |
 | Modify Quickstart or Explorer experience flow | `getting-started.md` |
-| Update documentation screenshots | `docs/assets/**` and `scripts/README.md` |
+| Update documentation screenshots | `docs/assets/**` and `scripts/doc-snapshot/README.md` |
 
 ## Documentation Screenshots
 
@@ -299,9 +299,9 @@ npx --prefix .doc-tools playwright install chromium
 Common commands:
 
 ```bash
-node scripts/capture-quickstart-screenshots.mjs
-node scripts/capture-service-metrics-screenshots.mjs
-node scripts/capture-topology-screenshots.mjs
+node scripts/doc-snapshot/capture-quickstart-screenshots.mjs
+node scripts/doc-snapshot/capture-service-metrics-screenshots.mjs
+node scripts/doc-snapshot/capture-topology-screenshots.mjs
 ```
 
 By default, screenshot scripts clean and generate mock data for the latest 7 days through Prism Explorer, then log in to Prism APM UI and capture screenshots. Use `--skip-data` when suitable data already exists.

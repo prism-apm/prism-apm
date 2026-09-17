@@ -17,7 +17,7 @@ export { localDateText } from './prism-mock-data.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const REPO_ROOT = path.resolve(__dirname, '..');
+const REPO_ROOT = path.resolve(__dirname, '../..');
 
 const DEFAULT_UI_URL = 'http://localhost:8066/';
 const DEFAULT_UI_LANG = 'zh-CN';
@@ -75,7 +75,7 @@ export const EXPECTED_SCREENSHOTS = [
 ];
 
 function usage(now = new Date()) {
-  return `Usage: node scripts/capture-quickstart-screenshots.mjs [options]
+  return `Usage: node scripts/doc-snapshot/capture-quickstart-screenshots.mjs [options]
 
 Options:
   --date YYYY-MM-DD             Generate and query a single mock data date.
@@ -85,7 +85,7 @@ Options:
   --explorer-lang zh|en         Prism Explorer screenshot language. Default: ${DEFAULT_EXPLORER_LANG}
   --ui-url URL                  Prism APM UI base URL. Default: ${DEFAULT_UI_URL}
   --ui-lang zh-CN|en-US         Prism APM UI screenshot language. Default: ${DEFAULT_UI_LANG}
-  --output DIR                  Screenshot output directory. Default: scripts/quickstart-shots
+  --output DIR                  Screenshot output directory. Default: scripts/doc-snapshot/quickstart-shots
   --skip-data                   Do not clear or generate Prism Explorer mock data.
   --validate-only               Validate existing screenshots without opening a browser.
   --headed                      Run Chromium in headed mode.

@@ -41,6 +41,6 @@ Thumbs.db
 .obsidian
 .claude
 .doc-tools/
-scripts/quickstart-shots/
-scripts/service-metrics-shots/
-scripts/topology-shots/
+scripts/doc-snapshot/quickstart-shots/
+scripts/doc-snapshot/service-metrics-shots/
+scripts/doc-snapshot/topology-shots/
