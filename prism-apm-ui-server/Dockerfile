@@ -1,5 +1,6 @@
 FROM eclipse-temurin:21-jre
 
+WORKDIR /app
 
 ARG OTEL_JAVA_AGENT_VERSION=2.25.0
 # Download the JAR file and its checksum file to vefity the file integrity.

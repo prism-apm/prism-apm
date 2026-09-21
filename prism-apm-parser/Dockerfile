@@ -1,5 +1,7 @@
 FROM eclipse-temurin:21-jre
 
+WORKDIR /app
+
 ARG ARG_SERVICE_NAME=prism-apm-parser
 ARG ARG_DIR_NAME=${ARG_SERVICE_NAME}
 
