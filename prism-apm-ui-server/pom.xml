@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.prism.apm</groupId>
         <artifactId>prism-apm-parent</artifactId>
-        <version>0.1.0-RC2</version>
+        <version>0.1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
