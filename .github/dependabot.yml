@@ -4,3 +4,15 @@ updates:
     directory: /
     schedule:
       interval: monthly
+  - package-ecosystem: docker
+    directory: /prism-apm-parser
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: /prism-apm-ui-server
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directory: /prism-apm-ui
+    schedule:
+      interval: monthly
