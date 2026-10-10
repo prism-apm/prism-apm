@@ -62,11 +62,13 @@ else
   release_version="$(printf '%s' "$current_version" | sed -E 's/[-+].*$//')"
 fi
 
-release_version_pattern='^[0-9]+\.[0-9]+\.[0-9]+$'
+numeric_identifier='(0|[1-9][0-9]*)'
+release_version_pattern="^$numeric_identifier\.$numeric_identifier\.$numeric_identifier$"
 
 if [[ ! "$release_version" =~ $release_version_pattern ]]; then
   echo "Invalid release version: $release_version" >&2
   echo "Expected a stable semantic version such as 0.1.0." >&2
+  echo "Numeric identifiers must not contain leading zeroes." >&2
   exit 1
 fi
 

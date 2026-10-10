@@ -26,11 +26,15 @@ if [[ $# -ne 1 ]]; then
 fi
 
 version="$1"
-semver_pattern='^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'
+numeric_identifier='(0|[1-9][0-9]*)'
+non_numeric_identifier='[0-9A-Za-z-]*[A-Za-z-][0-9A-Za-z-]*'
+prerelease_identifier="($numeric_identifier|$non_numeric_identifier)"
+semver_pattern="^$numeric_identifier\.$numeric_identifier\.$numeric_identifier(-$prerelease_identifier(\.$prerelease_identifier)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$"
 
 if [[ ! "$version" =~ $semver_pattern ]]; then
   echo "Invalid version: $version" >&2
   echo "Expected a semantic version such as 0.1.0-RC1." >&2
+  echo "Numeric identifiers must not contain leading zeroes." >&2
   exit 1
 fi
 
