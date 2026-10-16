@@ -7,9 +7,11 @@ usage() {
 Usage: ./scripts/release/set-version.sh <version>
 
 Example:
-  ./scripts/release/set-version.sh 0.1.0-RC1
+  ./scripts/release/set-version.sh 0.2.0-SNAPSHOT
 
 Updates the main Maven reactor and the prism-apm-ui npm package.
+Maven SNAPSHOT versions are mapped to npm development versions; for example,
+0.2.0-SNAPSHOT becomes 0.2.0-dev in prism-apm-ui.
 The prism-explorer project is not changed.
 It does not build, commit, tag, or push anything.
 EOF
@@ -38,6 +40,11 @@ if [[ ! "$version" =~ $semver_pattern ]]; then
   exit 1
 fi
 
+ui_version="$version"
+if [[ "$version" == *-SNAPSHOT ]]; then
+  ui_version="${version%-SNAPSHOT}-dev"
+fi
+
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo_root="$(cd "$script_dir/../.." && pwd)"
 
@@ -60,7 +67,8 @@ cd "$repo_root"
 
 (
   cd prism-apm-ui
-  npm version "$version" --no-git-tag-version
+  npm version "$ui_version" --no-git-tag-version
 )
 
-echo "Project versions updated to $version."
+echo "Maven project versions updated to $version."
+echo "prism-apm-ui version updated to $ui_version."
