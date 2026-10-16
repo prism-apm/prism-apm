@@ -1100,3 +1100,214 @@ Release 稳定
 ```
 
 三种不同类型的工作。
+
+---
+
+## 22. 创建 Release 分支的具体操作流程
+
+本节以准备 `0.1.0` 为例，说明从 `main` 创建 Release 维护分支、准备 RC、正式发布，以及升级 `main` 开发版本的具体操作。
+
+以下命令假设：
+
+```text
+GitHub Remote：github
+当前开发版本：0.1.0-SNAPSHOT
+Release 维护分支：release/v0.1.x
+第一个 RC 分支：release/v0.1.0-RC1
+正式 Release 分支：release/v0.1.0
+正式版 Tag：v0.1.0
+下一个开发版本：0.2.0-SNAPSHOT
+```
+
+如果本地使用的 GitHub Remote 名称不是 `github`，应将命令中的 `github` 替换为实际的 Remote 名称。可以使用以下命令确认：
+
+```bash
+git remote -v
+```
+
+### 22.1 发布前检查
+
+开始操作前，应确认工作区干净，并将本地 `main` 更新到 GitHub 上的最新状态：
+
+```bash
+git status --short
+
+git fetch github --prune
+git switch main
+git pull --ff-only github main
+```
+
+如果 `git status --short` 有输出，应先提交或暂存这些修改，不要带着未提交的修改创建 Release 分支。
+
+### 22.2 创建 Release 维护分支
+
+从最新的 `main` 创建负责维护整个 `0.1` 系列的分支：
+
+```bash
+git switch -c release/v0.1.x
+git push -u github release/v0.1.x
+```
+
+`release/v0.1.x` 是 `0.1.0`、`0.1.1`、`0.1.2` 等版本共同使用的 Release 维护分支。正式发布时，还会通过发布脚本创建对应的版本分支和 Tag：
+
+```text
+release/v0.1.x
+       │
+       ├── release/v0.1.0 ── tag v0.1.0
+       ├── release/v0.1.1 ── tag v0.1.1
+       └── release/v0.1.2 ── tag v0.1.2
+```
+
+版本分支保存该次正式发布的分支状态；Tag 是正式版本的精确、不可变标识。后续 Patch 修复仍然从 `release/v0.1.x` 开始。
+
+### 22.3 升级 `main` 的开发版本
+
+Release 维护分支创建后，`main` 即可进入下一个 Minor 版本的开发。版本升级应在独立分支中完成，并通过 Pull Request 合并到 `main`：
+
+```bash
+git switch main
+git switch -c chore/upgrade-version-to-0.2.0
+
+./scripts/release/set-version.sh 0.2.0-SNAPSHOT
+
+git diff --check
+git add -u
+git commit -m "chore: bump version to 0.2.0-SNAPSHOT"
+git push -u github chore/upgrade-version-to-0.2.0
+```
+
+注意，Maven 的开发版本后缀必须写成大写的 `SNAPSHOT`。脚本会将 Maven 的 `0.2.0-SNAPSHOT` 映射为 `prism-apm-ui` 使用的 `0.2.0-dev`。
+
+推送后，为该分支创建 Pull Request；CI 和 Code Review 通过后，再合并到 `main`。
+
+此步骤可以和 `release/v0.1.x` 上的 RC 准备及测试并行进行。
+
+### 22.4 创建 RC 分支
+
+从 Release 维护分支创建 RC 分支。分支名使用连字符 `-`，不要使用下划线 `_`：
+
+```bash
+git switch release/v0.1.x
+git pull --ff-only github release/v0.1.x
+git switch -c release/v0.1.0-RC1
+
+./scripts/release/set-version.sh 0.1.0-RC1
+
+git diff --check
+git add -u
+git commit -m "chore(release): prepare 0.1.0-RC1"
+git push -u github release/v0.1.0-RC1
+```
+
+然后针对该 RC 分支执行完整的 Release 测试。发现问题时，在 RC 分支上修复并重新测试。
+
+如果需要新的 RC，可以在包含前一个 RC 修复的 Commit 上创建下一个 RC 分支，并更新版本号：
+
+```bash
+git switch release/v0.1.0-RC1
+git switch -c release/v0.1.0-RC2
+
+./scripts/release/set-version.sh 0.1.0-RC2
+
+git diff --check
+git add -u
+git commit -m "chore(release): prepare 0.1.0-RC2"
+git push -u github release/v0.1.0-RC2
+```
+
+当前的 Docker 镜像发布工作流只接受 `vMAJOR.MINOR.PATCH` 格式的稳定版 Tag，因此推送 RC 分支不会向 Docker Hub 或阿里云 ACR 发布正式镜像。
+
+### 22.5 确认最终 RC
+
+假设最终通过验证的是 `release/v0.1.0-RC1`，正式发布前应更新本地分支，并再次确认工作区干净：
+
+```bash
+git fetch github --prune
+git switch release/v0.1.0-RC1
+git pull --ff-only github release/v0.1.0-RC1
+git status --short
+```
+
+`git status --short` 应没有输出。还应确认以下名称均未被占用：
+
+```bash
+git branch --all --list 'release/v0.1.0' 'remotes/github/release/v0.1.0'
+git tag --list v0.1.0
+```
+
+以上两个命令也应没有输出。然后针对这个最终 RC Commit 完成最后一轮 Release 验证。
+
+### 22.6 创建正式 Release 分支、Commit 和 Tag
+
+使用 `prepare-release-v1.sh`，从已验证的 RC 分支创建正式 Release 分支：
+
+```bash
+./scripts/release/prepare-release-v1.sh \
+  release/v0.1.0-RC1 \
+  release/v0.1.0 \
+  0.1.0
+```
+
+该脚本会：
+
+```text
+1. 从 release/v0.1.0-RC1 创建并切换到 release/v0.1.0。
+2. 将项目版本更新为 0.1.0。
+3. 创建 Commit：chore(release): prepare v0.1.0。
+4. 创建 annotated Tag：v0.1.0。
+```
+
+该脚本要求源分支存在于本地，且目标分支和 Tag 均不存在。它不会构建、测试或推送任何内容。
+
+脚本执行后，应确认版本、Commit 和 Tag 正确，并对最终 Release Commit 重新执行 Release 验证：
+
+```bash
+git status --short
+git show --stat --decorate HEAD
+git show v0.1.0
+```
+
+`git status --short` 应没有输出，并且 `release/v0.1.0` 与 `v0.1.0` 应指向同一个 Release Commit。
+
+### 22.7 更新 Release 维护分支
+
+正式 Release Commit 验证通过后，应将 `release/v0.1.x` 快进到该 Commit，确保后续 Patch 版本基于已经发布的版本继续维护：
+
+```bash
+git switch release/v0.1.x
+git pull --ff-only github release/v0.1.x
+git merge --ff-only release/v0.1.0
+```
+
+如果不能进行 Fast-forward，说明 Release 维护分支和最终 RC 已经发生分叉。此时不要强制覆盖历史，应先通过 Pull Request 合并缺少的修改，完成 Code Review、CI 和 Release 验证后再继续发布。
+
+### 22.8 推送到 GitHub
+
+只有最终验证通过后，才能推送 Release 维护分支、正式 Release 分支和 Tag。Tag 最后推送，以触发正式发布工作流：
+
+```bash
+git push -u github release/v0.1.0
+git push github release/v0.1.x
+git push github v0.1.0
+```
+
+推送 `v0.1.0` Tag 后，GitHub Actions 中的 Docker 镜像发布工作流会先运行测试，然后构建镜像，并将镜像推送到 Docker Hub 和阿里云 ACR。
+
+如果测试或发布工作流失败，不要移动或覆盖已经公开的 Tag。应修复问题、重新完成验证，并根据问题性质创建新的版本。
+
+### 22.9 同步到 Gitee
+
+GitHub 发布和验证完成后，应将相同的 Release 分支和 Tag 同步到 Gitee，不要在 Gitee 上创建另一条独立历史：
+
+```bash
+git push gitee release/v0.1.x
+git push gitee release/v0.1.0
+git push gitee v0.1.0
+```
+
+同步后，可以确认两个公共仓库指向同一个 Commit：
+
+```bash
+git ls-remote github refs/heads/release/v0.1.x refs/heads/release/v0.1.0 refs/tags/v0.1.0
+git ls-remote gitee refs/heads/release/v0.1.x refs/heads/release/v0.1.0 refs/tags/v0.1.0
+```

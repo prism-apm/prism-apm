@@ -1070,3 +1070,214 @@ release/v1.3.x
 ```
 
 This keeps development, release stabilization, and maintenance clearly separated.
+
+---
+
+# Concrete Procedure for Creating a Release Branch
+
+This section uses the preparation of `0.1.0` as an example to describe the concrete procedure for creating a Release maintenance branch from `main`, preparing an RC, publishing a stable release, and updating the development version on `main`.
+
+The commands below assume the following names and versions:
+
+```text
+GitHub remote: github
+Current development version: 0.1.0-SNAPSHOT
+Release maintenance branch: release/v0.1.x
+First RC branch: release/v0.1.0-RC1
+Stable Release branch: release/v0.1.0
+Stable Release tag: v0.1.0
+Next development version: 0.2.0-SNAPSHOT
+```
+
+If the local GitHub remote is not named `github`, replace `github` in the commands with the actual remote name. Use the following command to check it:
+
+```bash
+git remote -v
+```
+
+## Pre-release Checks
+
+Before starting, verify that the working tree is clean and update the local `main` branch to the latest state on GitHub:
+
+```bash
+git status --short
+
+git fetch github --prune
+git switch main
+git pull --ff-only github main
+```
+
+If `git status --short` produces any output, commit or stash those changes before creating the Release branch. Do not create a Release branch with uncommitted changes in the working tree.
+
+## Create the Release Maintenance Branch
+
+Create the branch that will maintain the entire `0.1` release line from the latest `main`:
+
+```bash
+git switch -c release/v0.1.x
+git push -u github release/v0.1.x
+```
+
+The `release/v0.1.x` branch maintains `0.1.0`, `0.1.1`, `0.1.2`, and all other releases in the `0.1` line. During each stable release, the release script also creates a version-specific branch and tag:
+
+```text
+release/v0.1.x
+       │
+       ├── release/v0.1.0 ── tag v0.1.0
+       ├── release/v0.1.1 ── tag v0.1.1
+       └── release/v0.1.2 ── tag v0.1.2
+```
+
+The version-specific branch preserves the branch state for that stable release. The tag is the exact, immutable identifier of the released version. Subsequent Patch fixes still start from `release/v0.1.x`.
+
+## Update the Development Version on `main`
+
+After the Release maintenance branch has been created, `main` can move to development of the next Minor version. Update the version on a separate branch and merge it into `main` through a Pull Request:
+
+```bash
+git switch main
+git switch -c chore/upgrade-version-to-0.2.0
+
+./scripts/release/set-version.sh 0.2.0-SNAPSHOT
+
+git diff --check
+git add -u
+git commit -m "chore: bump version to 0.2.0-SNAPSHOT"
+git push -u github chore/upgrade-version-to-0.2.0
+```
+
+The Maven development-version suffix must be uppercase `SNAPSHOT`. The script maps the Maven version `0.2.0-SNAPSHOT` to `0.2.0-dev` for `prism-apm-ui`.
+
+After pushing the branch, open a Pull Request. Merge it into `main` only after CI and Code Review pass.
+
+This step can run in parallel with RC preparation and testing on the `release/v0.1.x` line.
+
+## Create an RC Branch
+
+Create the RC branch from the Release maintenance branch. Use a hyphen (`-`) rather than an underscore (`_`) in the branch name:
+
+```bash
+git switch release/v0.1.x
+git pull --ff-only github release/v0.1.x
+git switch -c release/v0.1.0-RC1
+
+./scripts/release/set-version.sh 0.1.0-RC1
+
+git diff --check
+git add -u
+git commit -m "chore(release): prepare 0.1.0-RC1"
+git push -u github release/v0.1.0-RC1
+```
+
+Run the complete Release test suite against this RC branch. If a problem is found, fix it on the RC branch and repeat the tests.
+
+If another RC is required, create its branch from the commit that contains the fixes from the previous RC, then update the version:
+
+```bash
+git switch release/v0.1.0-RC1
+git switch -c release/v0.1.0-RC2
+
+./scripts/release/set-version.sh 0.1.0-RC2
+
+git diff --check
+git add -u
+git commit -m "chore(release): prepare 0.1.0-RC2"
+git push -u github release/v0.1.0-RC2
+```
+
+The current Docker image publishing workflow accepts only stable tags in the `vMAJOR.MINOR.PATCH` format. Pushing an RC branch therefore does not publish stable images to Docker Hub or Alibaba Cloud ACR.
+
+## Confirm the Final RC
+
+Assume that `release/v0.1.0-RC1` is the RC that passed validation. Before publishing the stable release, update the local branch and verify again that the working tree is clean:
+
+```bash
+git fetch github --prune
+git switch release/v0.1.0-RC1
+git pull --ff-only github release/v0.1.0-RC1
+git status --short
+```
+
+`git status --short` should produce no output. Also verify that the following branch and tag names are not already in use:
+
+```bash
+git branch --all --list 'release/v0.1.0' 'remotes/github/release/v0.1.0'
+git tag --list v0.1.0
+```
+
+These two commands should also produce no output. Then complete the final round of Release validation against this exact RC commit.
+
+## Create the Stable Release Branch, Commit, and Tag
+
+Use `prepare-release-v1.sh` to create the stable Release branch from the validated RC branch:
+
+```bash
+./scripts/release/prepare-release-v1.sh \
+  release/v0.1.0-RC1 \
+  release/v0.1.0 \
+  0.1.0
+```
+
+The script performs the following operations:
+
+```text
+1. Creates release/v0.1.0 from release/v0.1.0-RC1 and switches to it.
+2. Updates the project version to 0.1.0.
+3. Creates the commit: chore(release): prepare v0.1.0.
+4. Creates the annotated tag: v0.1.0.
+```
+
+The source branch must exist locally, and neither the target branch nor the tag may already exist. The script does not build, test, or push anything.
+
+After the script finishes, verify that the version, commit, and tag are correct, then run Release validation again against the final Release commit:
+
+```bash
+git status --short
+git show --stat --decorate HEAD
+git show v0.1.0
+```
+
+`git status --short` should produce no output, and `release/v0.1.0` and `v0.1.0` should identify the same Release commit.
+
+## Update the Release Maintenance Branch
+
+After the stable Release commit passes validation, fast-forward `release/v0.1.x` to that commit. This ensures that subsequent Patch releases continue from the version that was actually published:
+
+```bash
+git switch release/v0.1.x
+git pull --ff-only github release/v0.1.x
+git merge --ff-only release/v0.1.0
+```
+
+If the fast-forward is not possible, the Release maintenance branch and the final RC have diverged. Do not overwrite history. First merge the missing changes through a Pull Request, complete Code Review, CI, and Release validation, and only then continue the release.
+
+## Push to GitHub
+
+Push the Release maintenance branch, stable Release branch, and tag only after final validation succeeds. Push the tag last so that it triggers the stable-release workflow:
+
+```bash
+git push -u github release/v0.1.0
+git push github release/v0.1.x
+git push github v0.1.0
+```
+
+After the `v0.1.0` tag is pushed, the Docker image publishing workflow in GitHub Actions first runs the tests, then builds the images and pushes them to Docker Hub and Alibaba Cloud ACR.
+
+If testing or publishing fails, do not move or overwrite a tag that has already been published. Fix the problem, repeat validation, and create a new version appropriate to the nature of the issue.
+
+## Synchronize to Gitee
+
+After the GitHub release and validation complete, synchronize the same Release branches and tag to Gitee. Do not create an independent history on Gitee:
+
+```bash
+git push gitee release/v0.1.x
+git push gitee release/v0.1.0
+git push gitee v0.1.0
+```
+
+After synchronization, confirm that both public repositories contain the same references:
+
+```bash
+git ls-remote github refs/heads/release/v0.1.x refs/heads/release/v0.1.0 refs/tags/v0.1.0
+git ls-remote gitee refs/heads/release/v0.1.x refs/heads/release/v0.1.0 refs/tags/v0.1.0
+```
