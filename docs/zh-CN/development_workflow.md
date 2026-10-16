@@ -1,6 +1,4 @@
-# 开发工作流
-
-## 1. 概述
+# 开发
 
 本文档定义本项目的开发、测试、发布和版本维护流程。
 
@@ -36,9 +34,38 @@ feature/*
 
 ---
 
-## 2. 分支
+## 分支模型
 
-### 2.1 `main`
+本项目使用以下分支类型：
+
+```text
+main             主要开发分支
+
+feature/*        新功能
+fix/*            Bug 修复
+refactor/*       重构
+docs/*           文档
+test/*           测试相关修改
+release/*        Release 稳定和维护
+```
+
+正常开发流程为：
+
+```text
+feature/*
+    │
+    ▼
+   main
+    │
+    ▼
+release/vX.Y.x
+```
+
+Release 分支不作为普通 Feature 的集成分支。
+
+---
+
+## `main`
 
 `main` 是项目的主要开发分支。
 
@@ -69,7 +96,7 @@ feature/*
 
 ---
 
-### 2.2 Feature 分支
+## Feature 分支
 
 每个功能通常应该在独立的 Feature 分支中开发。
 
@@ -117,7 +144,7 @@ git switch -c feature/add-a
 
 ---
 
-### 2.3 Fix 分支
+## Fix 分支
 
 Bug 修复通常使用：
 
@@ -148,17 +175,14 @@ main
 
 ---
 
-### 2.4 其他分支类型
+## 其他分支类型
 
-还可以使用以下分支命名规范：
+其他常用的分支前缀包括：
 
 ```text
-feature/*     新功能
-fix/*         Bug 修复
-refactor/*    重构
-docs/*        文档
-test/*        测试相关修改
-release/*     Release 维护分支
+refactor/*
+docs/*
+test/*
 ```
 
 例如：
@@ -171,7 +195,7 @@ test/add-integration-tests
 
 ---
 
-## 3. Commit Message 规范
+## Commit Message 规范
 
 项目建议尽量使用 Conventional Commits。
 
@@ -204,7 +228,7 @@ test: add integration tests for authentication
 
 ---
 
-## 4. 合并到 `main` 的规则
+## 合并到 `main` 的规则
 
 一个 Pull Request 在合并到 `main` 之前，应满足项目规定的合并条件。
 
@@ -235,7 +259,7 @@ Code Review 通过
 
 ---
 
-## 5. 未完成或 Experimental 功能
+## 未完成或 Experimental 功能
 
 有些大型功能开发周期较长。
 
@@ -292,7 +316,152 @@ release/v1.3.x
 
 ---
 
-## 6. 创建 Release 分支
+# 测试
+
+测试在两个不同阶段进行：
+
+```text
+Feature 测试
+      ↓
+合并到 main
+      ↓
+Release 测试
+      ↓
+正式发布
+```
+
+两个阶段可能会运行一部分相同的自动化测试，但它们要回答的问题不同。
+
+---
+
+## Feature 级别测试
+
+一个 Feature 在进入 `main` 之前：
+
+```text
+feature/add-a
+      │
+      ├── 单元测试
+      ├── Feature 相关集成测试
+      ├── CI
+      ├── 静态检查
+      └── Code Review
+             │
+             ▼
+            main
+```
+
+这里要回答的问题是：
+
+> 这个独立修改是否已经可以进入 `main`？
+
+典型检查包括：
+
+```text
+单元测试
+与该 Feature 相关的集成测试
+静态代码分析
+构建验证
+Code Review
+基础 Regression 测试
+```
+
+---
+
+## Release 级别测试
+
+创建 `release/v1.3.x` 后，还需要再次对整个 Release 进行测试。
+
+```text
+release/v1.3.x
+       │
+       ├── RC Build
+       ├── 完整 Regression 测试
+       ├── 集成测试
+       ├── 部署测试
+       ├── 兼容性测试
+       ├── 升级测试
+       └── 类生产环境验证
+              │
+              ▼
+           v1.3.0
+```
+
+这里需要回答的问题是：
+
+> 完整的 `1.3.0` 是否已经可以进入生产环境？
+
+即使所有 Feature 单独测试都通过：
+
+```text
+Feature A ✅
+Feature B ✅
+Feature C ✅
+```
+
+也不能保证：
+
+```text
+A + B + C ✅
+```
+
+因为多个功能组合在一起后，可能出现新的问题。
+
+因此，同一套自动化测试在 Pull Request 阶段和 Release 阶段重复执行是正常的。
+
+---
+
+## 公共测试与私有测试
+
+开源仓库应该运行所有可以公开的测试。
+
+例如：
+
+```text
+Build
+单元测试
+公共集成测试
+静态分析
+代码风格检查
+公共 CI
+```
+
+不能公开的内部测试继续保留在私有环境中。
+
+因此，一个 Release 应该同时通过：
+
+```text
+公共仓库测试
+      +
+私有 / 内部测试
+      =
+Release 验证
+```
+
+最终将要创建 Tag 的那个公共 Commit 必须经过完整验证。
+
+正确流程：
+
+```text
+公共 Release Commit
+        │
+        ├── Public CI ✅
+        │
+        ├── Private Tests ✅
+        │
+        ▼
+      创建 Tag
+```
+
+最终测试完成之后，到创建 Tag 之前，不应该再修改代码。
+
+---
+
+# Release
+
+---
+
+## 创建 Release 分支
 
 当项目准备发布 `1.3.0` 时，从 `main` 创建 Release 分支。
 
@@ -347,7 +516,7 @@ release/v1.3.x
 
 ---
 
-## 7. 版本号
+## 版本号
 
 对于 Maven Java 项目，`main` 可以使用：
 
@@ -387,90 +556,7 @@ main
 
 ---
 
-## 8. 两个层级的测试
-
-整个工作流中有两个测试阶段。
-
-这两个测试阶段的目的不同。
-
-### 8.1 Feature 级别测试
-
-一个 Feature 在进入 `main` 之前：
-
-```text
-feature/add-a
-      │
-      ├── 单元测试
-      ├── Feature 相关集成测试
-      ├── CI
-      ├── 静态检查
-      └── Code Review
-             │
-             ▼
-            main
-```
-
-这里要回答的问题是：
-
-> 这个独立修改是否已经可以进入 `main`？
-
-典型检查包括：
-
-```text
-单元测试
-与该 Feature 相关的集成测试
-静态代码分析
-构建验证
-Code Review
-基础 Regression 测试
-```
-
----
-
-### 8.2 Release 级别测试
-
-创建 `release/v1.3.x` 后，还需要再次对整个 Release 进行测试。
-
-```text
-release/v1.3.x
-       │
-       ├── RC Build
-       ├── 完整 Regression 测试
-       ├── 集成测试
-       ├── 部署测试
-       ├── 兼容性测试
-       ├── 升级测试
-       └── 类生产环境验证
-              │
-              ▼
-           v1.3.0
-```
-
-这里需要回答的问题是：
-
-> 完整的 `1.3.0` 是否已经可以进入生产环境？
-
-即使所有 Feature 单独测试都通过：
-
-```text
-Feature A ✅
-Feature B ✅
-Feature C ✅
-```
-
-也不能保证：
-
-```text
-A + B + C ✅
-```
-
-因为多个功能组合在一起后，可能出现新的问题。
-
-因此，同一套自动化测试在 Pull Request 阶段和 Release 阶段重复执行是正常的。
-
----
-
-## 9. Release Candidate
+## Release Candidate
 
 正式发布之前，可以创建一个或多个 Release Candidate。
 
@@ -509,7 +595,7 @@ Build / Release 修复
 
 ---
 
-## 10. 正式发布
+## 正式发布与 Tag
 
 Release 测试通过后：
 
@@ -554,7 +640,46 @@ Tag 必须指向真正通过 Release 验证的那个 Commit。
 
 ---
 
-## 11. Patch Release
+## Release 分支规则
+
+Release 分支创建后，应该主要用于：
+
+```text
+版本稳定
+Release 准备
+Patch 维护
+```
+
+通常允许：
+
+```text
+Bug 修复
+Release Blocker 修复
+文档修复
+版本号修改
+Build 修复
+Release 配置修改
+```
+
+应该避免：
+
+```text
+大型重构
+无关代码清理
+新功能
+Breaking API 修改
+与当前 Release 无关的 Experimental 修改
+```
+
+这样可以减少 RC 之间的差异，并降低 Release 风险。
+
+---
+
+# 维护
+
+---
+
+## Patch Release
 
 一个 Release 分支负责维护整个版本系列。
 
@@ -596,7 +721,7 @@ v1.3.2 → Bug 修复
 
 ---
 
-## 12. Release 之后发现 Bug
+## Release 之后发现 Bug
 
 假设：
 
@@ -659,7 +784,7 @@ Bug Fix 优先进入 `main`，这样未来的新版本自然也会包含该修�
 
 ---
 
-## 13. Backport
+## Backport
 
 Backport 指的是：
 
@@ -714,7 +839,7 @@ CI
 
 ---
 
-## 14. Forward Merge / Forward Port
+## Forward Merge / Forward Port
 
 有些项目会采用相反的策略。
 
@@ -772,7 +897,7 @@ Forward Port:
 
 ---
 
-## 15. 同时维护多个版本
+## 同时维护多个版本
 
 随着项目发展，可能同时存在：
 
@@ -818,42 +943,103 @@ release/v1.3.x ──────F''──────────>
 
 ---
 
-## 16. Release 分支规则
-
-Release 分支创建后，应该主要用于：
-
-```text
-版本稳定
-Release 准备
-Patch 维护
-```
-
-通常允许：
-
-```text
-Bug 修复
-Release Blocker 修复
-文档修复
-版本号修改
-Build 修复
-Release 配置修改
-```
-
-应该避免：
-
-```text
-大型重构
-无关代码清理
-新功能
-Breaking API 修改
-与当前 Release 无关的 Experimental 修改
-```
-
-这样可以减少 RC 之间的差异，并降低 Release 风险。
+# 仓库与分发
 
 ---
 
-## 17. 完整开发生命周期
+## GitHub 与 Gitee
+
+项目可以同时发布到 GitHub 和 Gitee。
+
+两个公共仓库中的 Branch 和 Release Tag 应保持一致。
+
+每个正式版本至少同步：
+
+```text
+main
+release/vX.Y.x
+vX.Y.Z tag
+```
+
+例如：
+
+```text
+GitHub
+├── main
+├── release/v1.3.x
+└── v1.3.0
+
+Gitee
+├── main
+├── release/v1.3.x
+└── v1.3.0
+```
+
+不要在 GitHub 和 Gitee 上分别对同一个逻辑分支独立开发不同修改。
+
+同一个 Branch 应该只有一条权威历史，然后同步到另一个公共 Remote。
+
+---
+
+## Release Tags
+
+正式版本使用 Git Tag 表示：
+
+```text
+v1.3.0
+v1.3.1
+v1.3.2
+```
+
+Release 分支表示整个维护版本线：
+
+```text
+release/v1.3.x
+```
+
+Tag 表示具体且不可变的正式版本：
+
+```text
+release/v1.3.x
+       │
+       ├── v1.3.0
+       ├── v1.3.1
+       └── v1.3.2
+```
+
+---
+
+## Docker 镜像与发布产物
+
+Docker 镜像和其他 Release 产物应从经过测试的 Release Commit 或 Release Tag 构建。
+
+推荐流程：
+
+```text
+Release Commit
+      │
+      ├── Release 测试 ✅
+      │
+      ▼
+   v1.3.0 Tag
+      │
+      ▼
+构建发布产物
+      │
+      ├── Docker 镜像
+      ├── JAR
+      └── 其他发布包
+```
+
+这样可以确保发布产物与 Release Tag 所标识的源代码完全一致。
+
+---
+
+# 参考
+
+---
+
+## 完整开发生命周期
 
 完整流程可以总结为：
 
@@ -912,87 +1098,7 @@ main
 
 ---
 
-## 18. 公共测试与私有测试
-
-开源仓库应该运行所有可以公开的测试。
-
-例如：
-
-```text
-Build
-单元测试
-公共集成测试
-静态分析
-代码风格检查
-公共 CI
-```
-
-不能公开的内部测试继续保留在私有环境中。
-
-因此，一个 Release 应该同时通过：
-
-```text
-公共仓库测试
-      +
-私有 / 内部测试
-      =
-Release 验证
-```
-
-最终将要创建 Tag 的那个公共 Commit 必须经过完整验证。
-
-正确流程：
-
-```text
-公共 Release Commit
-        │
-        ├── Public CI ✅
-        │
-        ├── Private Tests ✅
-        │
-        ▼
-      创建 Tag
-```
-
-最终测试完成之后，到创建 Tag 之前，不应该再修改代码。
-
----
-
-## 19. GitHub 与 Gitee
-
-项目可以同时发布到 GitHub 和 Gitee。
-
-两个公共仓库中的 Branch 和 Release Tag 应保持一致。
-
-每个正式版本至少同步：
-
-```text
-main
-release/vX.Y.x
-vX.Y.Z tag
-```
-
-例如：
-
-```text
-GitHub
-├── main
-├── release/v1.3.x
-└── v1.3.0
-
-Gitee
-├── main
-├── release/v1.3.x
-└── v1.3.0
-```
-
-不要在 GitHub 和 Gitee 上分别对同一个逻辑分支独立开发不同修改。
-
-同一个 Branch 应该只有一条权威历史，然后同步到另一个公共 Remote。
-
----
-
-## 20. 核心原则
+## 核心原则
 
 整个工作流遵循以下原则：
 
@@ -1032,7 +1138,7 @@ Gitee
 
 ---
 
-## 21. 示例
+## 示例
 
 假设当前正在准备 `1.3.0`。
 
@@ -1103,7 +1209,7 @@ Release 稳定
 
 ---
 
-## 22. 创建 Release 分支的具体操作流程
+# 创建 Release 分支的具体操作流程
 
 本节以准备 `0.1.0` 为例，说明从 `main` 创建 Release 维护分支、准备 RC、正式发布，以及升级 `main` 开发版本的具体操作。
 
@@ -1125,7 +1231,7 @@ Release 维护分支：release/v0.1.x
 git remote -v
 ```
 
-### 22.1 发布前检查
+## 发布前检查
 
 开始操作前，应确认工作区干净，并将本地 `main` 更新到 GitHub 上的最新状态：
 
@@ -1139,7 +1245,7 @@ git pull --ff-only github main
 
 如果 `git status --short` 有输出，应先提交或暂存这些修改，不要带着未提交的修改创建 Release 分支。
 
-### 22.2 创建 Release 维护分支
+## 创建 Release 维护分支
 
 从最新的 `main` 创建负责维护整个 `0.1` 系列的分支：
 
@@ -1160,7 +1266,7 @@ release/v0.1.x
 
 版本分支保存该次正式发布的分支状态；Tag 是正式版本的精确、不可变标识。后续 Patch 修复仍然从 `release/v0.1.x` 开始。
 
-### 22.3 升级 `main` 的开发版本
+## 升级 `main` 的开发版本
 
 Release 维护分支创建后，`main` 即可进入下一个 Minor 版本的开发。版本升级应在独立分支中完成，并通过 Pull Request 合并到 `main`：
 
@@ -1182,7 +1288,7 @@ git push -u github chore/upgrade-version-to-0.2.0
 
 此步骤可以和 `release/v0.1.x` 上的 RC 准备及测试并行进行。
 
-### 22.4 创建 RC 分支
+## 创建 RC 分支
 
 从 Release 维护分支创建 RC 分支。分支名使用连字符 `-`，不要使用下划线 `_`：
 
@@ -1217,7 +1323,7 @@ git push -u github release/v0.1.0-RC2
 
 当前的 Docker 镜像发布工作流只接受 `vMAJOR.MINOR.PATCH` 格式的稳定版 Tag，因此推送 RC 分支不会向 Docker Hub 或阿里云 ACR 发布正式镜像。
 
-### 22.5 确认最终 RC
+## 确认最终 RC
 
 假设最终通过验证的是 `release/v0.1.0-RC1`，正式发布前应更新本地分支，并再次确认工作区干净：
 
@@ -1237,7 +1343,7 @@ git tag --list v0.1.0
 
 以上两个命令也应没有输出。然后针对这个最终 RC Commit 完成最后一轮 Release 验证。
 
-### 22.6 创建正式 Release 分支、Commit 和 Tag
+## 创建正式 Release 分支、Commit 和 Tag
 
 使用 `prepare-release-v1.sh`，从已验证的 RC 分支创建正式 Release 分支：
 
@@ -1269,7 +1375,7 @@ git show v0.1.0
 
 `git status --short` 应没有输出，并且 `release/v0.1.0` 与 `v0.1.0` 应指向同一个 Release Commit。
 
-### 22.7 更新 Release 维护分支
+## 更新 Release 维护分支
 
 正式 Release Commit 验证通过后，应将 `release/v0.1.x` 快进到该 Commit，确保后续 Patch 版本基于已经发布的版本继续维护：
 
@@ -1281,7 +1387,7 @@ git merge --ff-only release/v0.1.0
 
 如果不能进行 Fast-forward，说明 Release 维护分支和最终 RC 已经发生分叉。此时不要强制覆盖历史，应先通过 Pull Request 合并缺少的修改，完成 Code Review、CI 和 Release 验证后再继续发布。
 
-### 22.8 推送到 GitHub
+## 推送到 GitHub
 
 只有最终验证通过后，才能推送 Release 维护分支、正式 Release 分支和 Tag。Tag 最后推送，以触发正式发布工作流：
 
@@ -1295,7 +1401,7 @@ git push github v0.1.0
 
 如果测试或发布工作流失败，不要移动或覆盖已经公开的 Tag。应修复问题、重新完成验证，并根据问题性质创建新的版本。
 
-### 22.9 同步到 Gitee
+## 同步到 Gitee
 
 GitHub 发布和验证完成后，应将相同的 Release 分支和 Tag 同步到 Gitee，不要在 Gitee 上创建另一条独立历史：
 

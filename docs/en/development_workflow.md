@@ -1,5 +1,7 @@
 # Development
 
+This document defines the development, testing, release, and version maintenance processes for this project.
+
 This project follows a **mainline development + release branch** model:
 
 ```text
@@ -83,6 +85,10 @@ A change should normally be merged into `main` only when:
 3. Code review is complete.
 4. Existing functionality is not broken.
 5. The change is acceptable for inclusion in the next release.
+
+Unfinished user-visible features should normally not be merged directly into `main`.
+
+If a large feature must be merged early, it should use a Feature Flag or be marked as Experimental and disabled by default.
 
 ---
 
@@ -247,7 +253,11 @@ The release branch should not be used as a place to arbitrarily select finished 
 
 ## Incomplete or Experimental Features
 
-Large features sometimes need to be merged before they are ready for normal production use.
+Some large features have long development cycles.
+
+To avoid maintaining a long-lived Feature branch that diverges increasingly from `main`, its code may sometimes need to be merged early.
+
+In that situation, the feature itself should not be exposed as a normal production feature.
 
 Possible mechanisms include:
 
@@ -293,6 +303,8 @@ Code included in release
         ≠
 Feature enabled for users
 ```
+
+Enable Feature C only after it becomes stable.
 
 ---
 
@@ -473,12 +485,14 @@ After branching:
 ```text
 main
     → next minor version development
+    → for example, 1.4.0-SNAPSHOT
 
 release/v1.3.x
     → release stabilization
     → RC
     → v1.3.0
-    → patch maintenance
+    → v1.3.1
+    → v1.3.2
 ```
 
 ---
@@ -526,6 +540,8 @@ release/v1.3.x
        ├── testing
        └── v1.3.0
 ```
+
+An RC should be built from the same Release branch that will be used for the final stable release.
 
 Once the RC phase begins, the release branch should be considered frozen.
 
@@ -590,8 +606,8 @@ Release branches are for:
 
 ```text
 Release stabilization
+Release preparation
 Patch maintenance
-Release-related fixes
 ```
 
 Normally allowed:
@@ -610,6 +626,8 @@ Normally avoid:
 * Unrelated cleanup
 * Breaking API changes
 * Unrelated experimental work
+
+These restrictions reduce the differences between RCs and lower release risk.
 
 ---
 
@@ -635,11 +653,19 @@ For example:
 
 ```text
 v1.3.0 → initial stable release
+
 v1.3.1 → bug fixes
+
 v1.3.2 → bug fixes
 ```
 
-Avoid adding new public features or incompatible API changes in a patch release.
+Avoid the following in a Patch release:
+
+```text
+Adding new public features
+Changing public APIs
+Introducing incompatible changes
+```
 
 ---
 
@@ -700,6 +726,8 @@ A──B──C──────F'
 
 The fix enters `main` first so future releases contain it automatically.
 
+Afterward, selectively Backport the required fixes to older maintenance branches.
+
 The complete release branch should normally **not** be merged back into `main`.
 
 ---
@@ -727,7 +755,7 @@ git switch release/v1.3.x
 git cherry-pick <commit>
 ```
 
-It may also be implemented using a Backport Pull Request:
+On GitHub or Gitee, it may also be implemented using a Backport Pull Request:
 
 ```text
 PR #100
@@ -803,6 +831,8 @@ Backport when necessary
 Supported release branches
 ```
 
+When there is an explicit reason to do so, the fix may instead be made in the oldest affected version first and then Forward Ported.
+
 ---
 
 ## Multiple Supported Releases
@@ -858,6 +888,16 @@ Only supported release lines need to receive the Backport.
 The project may be published to both GitHub and Gitee.
 
 The important branches and release tags should remain consistent:
+
+Every stable release should synchronize at least:
+
+```text
+main
+release/vX.Y.x
+vX.Y.Z tag
+```
+
+For example:
 
 ```text
 GitHub
@@ -935,6 +975,8 @@ This ensures that released artifacts correspond exactly to the source code ident
 
 ## Full Development Lifecycle
 
+The complete lifecycle can be summarized as follows:
+
 ```text
 Issue / Requirement
         │
@@ -985,7 +1027,7 @@ Meanwhile:
 ```text
 main
  │
- └── continues toward 1.4.0-SNAPSHOT
+ └── continues toward 1.4.0
 ```
 
 ---
@@ -1069,7 +1111,15 @@ release/v1.3.x
    └── v1.3.1
 ```
 
-This keeps development, release stabilization, and maintenance clearly separated.
+This approach clearly separates:
+
+```text
+Normal development
+Release stabilization
+Maintenance of older versions
+```
+
+These are three different types of work.
 
 ---
 
