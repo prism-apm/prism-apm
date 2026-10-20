@@ -1033,6 +1033,23 @@ Release Commit
 
 这样可以确保发布产物与 Release Tag 所标识的源代码完全一致。
 
+工作流会发布三个支持 `linux/amd64` 和 `linux/arm64` 的多平台镜像：
+
+| 组件 | Docker Hub | 阿里云 ACR |
+| --- | --- | --- |
+| Parser | `prismapm/prism-apm-parser` | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-parser` |
+| UI Server | `prismapm/prism-apm-ui-server` | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui-server` |
+| UI | `prismapm/prism-apm-ui` | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui` |
+
+Git Tag 与镜像标签的映射如下：
+
+| Git Tag | 镜像标签 | 是否更新 `latest` |
+| --- | --- | --- |
+| `v0.1.0` | `0.1.0`、`latest` | 是 |
+| `v0.2.0-rc.1` | `0.2.0-rc.1` | 否 |
+
+Docker Hub 仓库页面分别为 [Parser](https://hub.docker.com/r/prismapm/prism-apm-parser/tags)、[UI Server](https://hub.docker.com/r/prismapm/prism-apm-ui-server/tags) 和 [UI](https://hub.docker.com/r/prismapm/prism-apm-ui/tags)。
+
 ---
 
 # 参考
@@ -1321,7 +1338,7 @@ git commit -m "chore(release): prepare 0.1.0-RC2"
 git push -u github release/v0.1.0-RC2
 ```
 
-当前的 Docker 镜像发布工作流只接受 `vMAJOR.MINOR.PATCH` 格式的稳定版 Tag，因此推送 RC 分支不会向 Docker Hub 或阿里云 ACR 发布正式镜像。
+Docker 镜像发布工作流接受 `vMAJOR.MINOR.PATCH` 格式的稳定版 Tag，以及 `vMAJOR.MINOR.PATCH-rc.N` 格式的 RC Tag。仅推送 RC 分支不会发布镜像；如果推送 RC Tag，工作流只会向 Docker Hub 和阿里云 ACR 发布对应的版本镜像标签，不会更新 `latest`。
 
 ## 确认最终 RC
 
@@ -1397,7 +1414,7 @@ git push github release/v0.1.x
 git push github v0.1.0
 ```
 
-推送 `v0.1.0` Tag 后，GitHub Actions 中的 Docker 镜像发布工作流会先运行测试，然后构建镜像，并将镜像推送到 Docker Hub 和阿里云 ACR。
+推送 `v0.1.0` Tag 后，GitHub Actions 中的 Docker 镜像发布工作流会先运行测试，然后构建 Parser、UI Server 和 UI 镜像，并将 `0.1.0` 和 `latest` 标签推送到上面列出的 Docker Hub 和阿里云 ACR 仓库。
 
 如果测试或发布工作流失败，不要移动或覆盖已经公开的 Tag。应修复问题、重新完成验证，并根据问题性质创建新的版本。
 

@@ -1,6 +1,6 @@
 ---
 created: 2026-05-28 14:29:02
-modified: 2026-08-04 16:48:05
+modified: 2026-10-20 17:26:33
 ---
 
 This document explains how to deploy Prism APM in a public environment. It is based on the current repository state and focuses on local development and single-node server deployment.
@@ -28,6 +28,7 @@ Prepare these environments first:
 
 | Dependency | Recommended version | Purpose |
 | --- | --- | --- |
+| Docker | Docker Engine with Compose v2 | Run the published images and the provided Compose environment. |
 | JDK | 21 | Backend build and runtime. |
 | Maven | 3.9+ | Build Java modules. |
 | Node.js | `>=22.12.0` | Build and run the frontend development service. |
@@ -37,7 +38,39 @@ Prepare these environments first:
 | Kafka | Compatible with Spring Kafka client | Trace data input. |
 | `psql` | Matches PostgreSQL | Execute database initialization scripts. |
 
+JDK, Maven, Node.js, and npm are required only when building from source. A deployment based on the published images does not require these build tools.
+
 If running in containers, make sure the container network can access TimescaleDB and Kafka. `localhost` inside a container points to the container itself, not the host.
+
+## Published Images
+
+Prism APM publishes multi-platform images for `linux/amd64` and `linux/arm64` to Docker Hub and Alibaba Cloud ACR:
+
+| Component | Docker Hub | Alibaba Cloud ACR |
+| --- | --- | --- |
+| Parser | [`prismapm/prism-apm-parser`](https://hub.docker.com/r/prismapm/prism-apm-parser/tags) | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-parser` |
+| UI Server | [`prismapm/prism-apm-ui-server`](https://hub.docker.com/r/prismapm/prism-apm-ui-server/tags) | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui-server` |
+| UI | [`prismapm/prism-apm-ui`](https://hub.docker.com/r/prismapm/prism-apm-ui/tags) | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui` |
+
+Stable releases publish both a version tag such as `0.1.0` and `latest`. Pin the version tag in production so that an image update cannot change a running deployment unexpectedly.
+
+Pull version `0.1.0` from Docker Hub:
+
+```bash
+docker pull prismapm/prism-apm-parser:0.1.0
+docker pull prismapm/prism-apm-ui-server:0.1.0
+docker pull prismapm/prism-apm-ui:0.1.0
+```
+
+For hosts in mainland China, the same version can be pulled from Alibaba Cloud ACR:
+
+```bash
+docker pull crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-parser:0.1.0
+docker pull crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui-server:0.1.0
+docker pull crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui:0.1.0
+```
+
+If the ACR repositories require authentication, run `docker login crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com` before pulling.
 
 ## Ports and Defaults
 
@@ -115,6 +148,14 @@ If the `service_call` table does not exist, the core SQL did not execute success
 
 ```shell
 cd docker-compose
+PRISM_IMAGE_TAG=0.1.0 docker compose up -d
+```
+
+The Compose file uses Docker Hub by default. To use Alibaba Cloud ACR instead:
+
+```bash
+PRISM_IMAGE_PREFIX=crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/ \
+PRISM_IMAGE_TAG=0.1.0 \
 docker compose up -d
 ```
 
@@ -134,10 +175,10 @@ A single-node deployment can use this flow:
 1. Deploy TimescaleDB on the server.
 2. Deploy Kafka, or connect to an existing Kafka cluster.
 3. Execute initialization scripts under `sql/`.
-4. Build and start `prism-apm-parser`.
-5. Build and start `prism-apm-ui-server`.
-6. Build `prism-apm-ui` and host `dist/` with Nginx or another static server.
-7. Configure Nginx to reverse proxy `/api` to `prism-apm-ui-server`.
+4. Pull and start `prism-apm-parser`.
+5. Pull and start `prism-apm-ui-server`.
+6. Pull and start `prism-apm-ui`, or build the frontend and host `dist/` with Nginx or another static server.
+7. Make sure the UI proxies `/api` to `prism-apm-ui-server`.
 
 ## Start Parser
 
@@ -154,7 +195,7 @@ docker run --rm \
   -e KAFKA_USERNAME=admin \
   -e KAFKA_PASSWORD=your-kafka-password \
   -e PARSER_KAFKA_TOPIC=opentelemetry-trace \
-  prism-apm-parser \
+  prismapm/prism-apm-parser:0.1.0 \
   --spring.profiles.active=kafka-sasl
 ```
 
@@ -169,7 +210,7 @@ docker run --rm \
   -e DB_PASSWORD=your-db-password \
   -e KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:9094 \
   -e PARSER_KAFKA_TOPIC=opentelemetry-trace \
-  prism-apm-parser
+  prismapm/prism-apm-parser:0.1.0
 ```
 
 ## Start UI Server
@@ -189,12 +230,26 @@ docker run --rm \
   -e DB_READ_DB_NAME=apm \
   -e DB_READ_USERNAME=postgres \
   -e DB_READ_PASSWORD=your-db-password \
-  prism-apm-ui-server --spring.profiles.active=local
+  prismapm/prism-apm-ui-server:0.1.0 --spring.profiles.active=local
 ```
+
+To use Alibaba Cloud ACR, replace the Docker Hub image prefix in these commands with `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm`.
 
 ## Start UI
 
-Build UI:
+Run the published UI image and point it to UI Server:
+
+```bash
+docker run --rm \
+  --add-host=host.docker.internal:host-gateway \
+  -p 8066:8066 \
+  -e UI_SERVER_URL=http://host.docker.internal:8080 \
+  prismapm/prism-apm-ui:0.1.0
+```
+
+Replace `UI_SERVER_URL` with an address reachable from the UI container. When both containers use the same user-defined Docker network, use the UI Server container name, for example `http://prism-apm-ui-server:8080`.
+
+Alternatively, build the UI from source:
 
 ```bash
 cd prism-apm-ui

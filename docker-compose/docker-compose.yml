@@ -1,3 +1,17 @@
+# Prism APM application images use Docker Hub and the `latest` tag by default:
+#   docker compose up -d
+#
+# Use a fixed Docker Hub release:
+#   PRISM_IMAGE_TAG=0.1.0 docker compose up -d
+#
+# Use locally built images named prism-apm-parser, prism-apm-ui-server, and prism-apm-ui:
+#   PRISM_IMAGE_PREFIX= docker compose up -d
+#
+# Use Alibaba Cloud ACR (a non-empty PRISM_IMAGE_PREFIX must end with `/`):
+#   PRISM_IMAGE_PREFIX=crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/ \
+#   PRISM_IMAGE_TAG=0.1.0 \
+#   docker compose up -d
+
 networks:
   prism-apm-net:
     driver: bridge
@@ -130,7 +144,7 @@ services:
     restart: unless-stopped
 
   prism-apm-parser:
-    image: prism-apm-parser
+    image: ${PRISM_IMAGE_PREFIX-docker.io/prismapm/}prism-apm-parser:${PRISM_IMAGE_TAG:-latest}
     networks:
       - prism-apm-net
     ports:
@@ -149,7 +163,7 @@ services:
     restart: unless-stopped
 
   prism-apm-ui-server:
-    image: prism-apm-ui-server
+    image: ${PRISM_IMAGE_PREFIX-docker.io/prismapm/}prism-apm-ui-server:${PRISM_IMAGE_TAG:-latest}
     networks:
       - prism-apm-net
     ports:
@@ -172,7 +186,7 @@ services:
     restart: unless-stopped
 
   prism-apm-ui:
-    image: prism-apm-ui
+    image: ${PRISM_IMAGE_PREFIX-docker.io/prismapm/}prism-apm-ui:${PRISM_IMAGE_TAG:-latest}
     networks:
       - prism-apm-net
     ports:

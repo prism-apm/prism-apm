@@ -969,6 +969,23 @@ Build artifacts
 
 This ensures that released artifacts correspond exactly to the source code identified by the release tag.
 
+The workflow publishes three multi-platform images for `linux/amd64` and `linux/arm64`:
+
+| Component | Docker Hub | Alibaba Cloud ACR |
+| --- | --- | --- |
+| Parser | `prismapm/prism-apm-parser` | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-parser` |
+| UI Server | `prismapm/prism-apm-ui-server` | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui-server` |
+| UI | `prismapm/prism-apm-ui` | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui` |
+
+The Git tag determines the image tags:
+
+| Git tag | Image tags | `latest` updated |
+| --- | --- | --- |
+| `v0.1.0` | `0.1.0`, `latest` | Yes |
+| `v0.2.0-rc.1` | `0.2.0-rc.1` | No |
+
+The Docker Hub repository pages are [Parser](https://hub.docker.com/r/prismapm/prism-apm-parser/tags), [UI Server](https://hub.docker.com/r/prismapm/prism-apm-ui-server/tags), and [UI](https://hub.docker.com/r/prismapm/prism-apm-ui/tags).
+
 ---
 
 # Reference
@@ -1235,7 +1252,7 @@ git commit -m "chore(release): prepare 0.1.0-RC2"
 git push -u github release/v0.1.0-RC2
 ```
 
-The current Docker image publishing workflow accepts only stable tags in the `vMAJOR.MINOR.PATCH` format. Pushing an RC branch therefore does not publish stable images to Docker Hub or Alibaba Cloud ACR.
+The Docker image publishing workflow accepts stable tags in the `vMAJOR.MINOR.PATCH` format and RC tags in the `vMAJOR.MINOR.PATCH-rc.N` format. Pushing an RC branch alone does not publish images. If an RC tag is pushed, the workflow publishes only the corresponding versioned image tag to Docker Hub and Alibaba Cloud ACR and does not update `latest`.
 
 ## Confirm the Final RC
 
@@ -1311,7 +1328,7 @@ git push github release/v0.1.x
 git push github v0.1.0
 ```
 
-After the `v0.1.0` tag is pushed, the Docker image publishing workflow in GitHub Actions first runs the tests, then builds the images and pushes them to Docker Hub and Alibaba Cloud ACR.
+After the `v0.1.0` tag is pushed, the Docker image publishing workflow in GitHub Actions first runs the tests, then builds the Parser, UI Server, and UI images and pushes the `0.1.0` and `latest` tags to the Docker Hub and Alibaba Cloud ACR repositories listed above.
 
 If testing or publishing fails, do not move or overwrite a tag that has already been published. Fix the problem, repeat validation, and create a new version appropriate to the nature of the issue.
 

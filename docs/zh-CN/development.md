@@ -1,6 +1,6 @@
 ---
 created: 2026-06-24 15:11:30
-modified: 2026-08-05 17:43:21
+modified: 2026-10-20 17:26:33
 ---
 
 # 开发指南
@@ -113,6 +113,16 @@ docker build -f prism-apm-ui/Dockerfile -t prism-apm-ui .
 
 `prism-apm-ui-server/Dockerfile` 会下载 OpenTelemetry Java Agent，构建该镜像时需要可以访问 Maven Central。
 
+如果不需要验证本地 Dockerfile 改动，也可以直接拉取已发布的镜像：
+
+```bash
+docker pull prismapm/prism-apm-parser:latest
+docker pull prismapm/prism-apm-ui-server:latest
+docker pull prismapm/prism-apm-ui:latest
+```
+
+如需可复现的测试环境，请将 `latest` 替换为 `0.1.0` 等明确的发布版本。
+
 
 ## Docker compose 启动完整环境
 
@@ -123,7 +133,23 @@ cd docker-compose
 docker compose up -d
 ```
 
-这套编排包含 TimescaleDB、Kafka、Jaeger、Parser、UI Server 和 UI。首次启动前需要先构建镜像，否则 `prism-apm-parser`、`prism-apm-ui-server` 和 `prism-apm-ui` 镜像可能不存在。
+这套编排包含 TimescaleDB、Kafka、Jaeger、Parser、UI Server 和 UI，默认使用 Docker Hub 上 `prismapm` 命名空间中的 `latest` 镜像。
+
+如需使用本地构建的 `prism-apm-parser`、`prism-apm-ui-server` 和 `prism-apm-ui` 镜像，请显式将镜像前缀设置为空：
+
+```bash
+PRISM_IMAGE_PREFIX= docker compose up -d
+```
+
+如需测试固定版本或改用阿里云 ACR，可以覆盖镜像标签或仓库前缀：
+
+```bash
+PRISM_IMAGE_TAG=0.1.0 docker compose up -d
+
+PRISM_IMAGE_PREFIX=crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/ \
+PRISM_IMAGE_TAG=0.1.0 \
+docker compose up -d
+```
 
 
 ## 单独启动服务

@@ -1,6 +1,6 @@
 ---
 created: 2026-06-24 15:11:30
-modified: 2026-08-05 17:43:21
+modified: 2026-10-20 17:26:33
 ---
 
 # Development Guide
@@ -110,6 +110,16 @@ docker build -f prism-apm-ui/Dockerfile -t prism-apm-ui .
 
 `prism-apm-ui-server/Dockerfile` downloads OpenTelemetry Java Agent, so building that image requires access to Maven Central.
 
+If you do not need to test local Dockerfile changes, pull the published images instead:
+
+```bash
+docker pull prismapm/prism-apm-parser:latest
+docker pull prismapm/prism-apm-ui-server:latest
+docker pull prismapm/prism-apm-ui:latest
+```
+
+For reproducible testing, replace `latest` with a release version such as `0.1.0`.
+
 ## Start the Full Environment with Docker Compose
 
 Start the main Docker Compose environment from the repository root:
@@ -119,7 +129,23 @@ cd docker-compose
 docker compose up -d
 ```
 
-This orchestration contains TimescaleDB, Kafka, Jaeger, Parser, UI Server, and UI. Build images before the first startup; otherwise the `prism-apm-parser`, `prism-apm-ui-server`, and `prism-apm-ui` images may not exist.
+This orchestration contains TimescaleDB, Kafka, Jaeger, Parser, UI Server, and UI. It uses the Docker Hub images under `prismapm` and the `latest` tag by default.
+
+To use the locally built `prism-apm-parser`, `prism-apm-ui-server`, and `prism-apm-ui` images, explicitly set the image prefix to an empty value:
+
+```bash
+PRISM_IMAGE_PREFIX= docker compose up -d
+```
+
+To test a fixed release or use Alibaba Cloud ACR, override the image tag or repository prefix:
+
+```bash
+PRISM_IMAGE_TAG=0.1.0 docker compose up -d
+
+PRISM_IMAGE_PREFIX=crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/ \
+PRISM_IMAGE_TAG=0.1.0 \
+docker compose up -d
+```
 
 ## Start Services Individually
 

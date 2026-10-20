@@ -1,6 +1,6 @@
 ---
 created: 2026-05-28 14:29:02
-modified: 2026-08-04 16:48:05
+modified: 2026-10-20 17:26:33
 ---
 
 
@@ -30,6 +30,7 @@ modified: 2026-08-04 16:48:05
 
 | 依赖                  | 建议版本                        | 用途                   |
 | ------------------- | --------------------------- | -------------------- |
+| Docker              | 支持 Compose v2 的 Docker Engine | 运行已发布镜像和仓库提供的 Compose 环境。 |
 | JDK                 | 21                          | 后端编译和运行。             |
 | Maven               | 3.9+                        | 构建 Java 模块。          |
 | Node. Js            | `>=22.12.0`                 | 构建和运行前端开发服务。         |
@@ -39,7 +40,39 @@ modified: 2026-08-04 16:48:05
 | Kafka               | 兼容 Spring Kafka 客户端         | trace 数据输入。          |
 | `psql`              | 与 PostgreSQL 匹配             | 执行数据库初始化脚本。          |
 
+只有从源码构建时才需要 JDK、Maven、Node.js 和 npm。直接使用已发布镜像部署时不需要这些构建工具。
+
 如果使用容器运行，请确保容器网络可以访问 TimescaleDB 和 Kafka。容器中的 `localhost` 指向容器自身，不是宿主机。
+
+## 已发布镜像
+
+Prism APM 会将支持 `linux/amd64` 和 `linux/arm64` 的多平台镜像发布到 Docker Hub 和阿里云 ACR：
+
+| 组件 | Docker Hub | 阿里云 ACR |
+| --- | --- | --- |
+| Parser | [`prismapm/prism-apm-parser`](https://hub.docker.com/r/prismapm/prism-apm-parser/tags) | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-parser` |
+| UI Server | [`prismapm/prism-apm-ui-server`](https://hub.docker.com/r/prismapm/prism-apm-ui-server/tags) | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui-server` |
+| UI | [`prismapm/prism-apm-ui`](https://hub.docker.com/r/prismapm/prism-apm-ui/tags) | `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui` |
+
+稳定版本会同时发布 `0.1.0` 之类的版本标签和 `latest` 标签。生产环境应固定使用版本标签，避免镜像更新导致正在运行的部署意外变化。
+
+从 Docker Hub 拉取 `0.1.0`：
+
+```bash
+docker pull prismapm/prism-apm-parser:0.1.0
+docker pull prismapm/prism-apm-ui-server:0.1.0
+docker pull prismapm/prism-apm-ui:0.1.0
+```
+
+中国大陆服务器可以从阿里云 ACR 拉取相同版本：
+
+```bash
+docker pull crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-parser:0.1.0
+docker pull crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui-server:0.1.0
+docker pull crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/prism-apm-ui:0.1.0
+```
+
+如果 ACR 仓库要求身份验证，请先执行 `docker login crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com`。
 
 ## 端口和默认配置
 
@@ -119,6 +152,14 @@ psql -d apm -c "select count(*) from service_call;"
 
 ```shell
 cd docker-compose
+PRISM_IMAGE_TAG=0.1.0 docker compose up -d
+```
+
+Compose 文件默认使用 Docker Hub。如需改用阿里云 ACR：
+
+```bash
+PRISM_IMAGE_PREFIX=crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm/ \
+PRISM_IMAGE_TAG=0.1.0 \
 docker compose up -d
 ```
 
@@ -136,10 +177,10 @@ docker compose up -d
 1. 在服务器上部署 TimescaleDB。
 2. 部署 Kafka，或连接已有 Kafka 集群。
 3. 执行 `sql/` 下初始化脚本。
-4. 构建并启动 `prism-apm-parser`。
-5. 构建并启动 `prism-apm-ui-server`。
-6. 构建 `prism-apm-ui`，将 `dist/` 交给 Nginx 或其他静态服务器托管。
-7. 在 Nginx 中将 `/api` 反向代理到 `prism-apm-ui-server`。
+4. 拉取并启动 `prism-apm-parser`。
+5. 拉取并启动 `prism-apm-ui-server`。
+6. 拉取并启动 `prism-apm-ui`，或者从源码构建前端并将 `dist/` 交给 Nginx 等静态服务器托管。
+7. 确保 UI 将 `/api` 反向代理到 `prism-apm-ui-server`。
 
 
 ## 启动 Parser
@@ -157,7 +198,7 @@ docker run --rm \
   -e KAFKA_USERNAME=admin \
   -e KAFKA_PASSWORD=your-kafka-password \
   -e PARSER_KAFKA_TOPIC=opentelemetry-trace \
-  prism-apm-parser \
+  prismapm/prism-apm-parser:0.1.0 \
   --spring.profiles.active=kafka-sasl
 ```
 
@@ -172,7 +213,7 @@ docker run --rm \
   -e DB_PASSWORD=your-db-password \
   -e KAFKA_BOOTSTRAP_SERVERS=host.docker.internal:9094 \
   -e PARSER_KAFKA_TOPIC=opentelemetry-trace \
-  prism-apm-parser 
+  prismapm/prism-apm-parser:0.1.0
 ```
 
 
@@ -194,12 +235,26 @@ docker run --rm \
   -e DB_READ_DB_NAME=apm \
   -e DB_READ_USERNAME=postgres \
   -e DB_READ_PASSWORD=your-db-password \
-  prism-apm-ui-server --spring.profiles.active=local
+  prismapm/prism-apm-ui-server:0.1.0 --spring.profiles.active=local
 ```
+
+如需使用阿里云 ACR，请将上述命令中的 Docker Hub 镜像前缀替换为 `crpi-16i4tdv4pz11ple8.cn-beijing.personal.cr.aliyuncs.com/prism-apm`。
 
 ## 启动 UI
 
-构建 UI：
+运行已发布的 UI 镜像，并将其指向 UI Server：
+
+```bash
+docker run --rm \
+  --add-host=host.docker.internal:host-gateway \
+  -p 8066:8066 \
+  -e UI_SERVER_URL=http://host.docker.internal:8080 \
+  prismapm/prism-apm-ui:0.1.0
+```
+
+请将 `UI_SERVER_URL` 替换为 UI 容器可以访问的地址。如果两个容器位于同一个用户自定义 Docker 网络中，可以使用 UI Server 容器名，例如 `http://prism-apm-ui-server:8080`。
+
+也可以选择从源码构建 UI：
 
 ```bash
 cd prism-apm-ui
