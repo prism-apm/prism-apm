@@ -3,6 +3,7 @@ package org.prism.apm.parser.repository;
 import org.prism.apm.parser.MybatisTestBase;
 import org.prism.apm.parser.enums.SpanKindEnum;
 import org.prism.apm.parser.model.entity.ServiceCallEntity;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.ConnectionCallback;
@@ -36,6 +37,11 @@ class ApmTimescaleCaggCalculationTest extends MybatisTestBase {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @AfterEach
+    void cleanUpServiceCallFixtures() {
+        jdbcTemplate.update("DELETE FROM service_call");
+    }
 
     private record EntryFixtureDimensions(
             String serviceName,

@@ -5,8 +5,10 @@ import org.prism.apm.parser.enums.SpanKindEnum;
 import org.prism.apm.parser.model.entity.ServiceCallEntity;
 
 import org.prism.apm.parser.utils.CommonUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,6 +28,14 @@ public class ServiceCallMapperTest extends MybatisTestBase {
 
     @Autowired
     private ServiceCallMapper mapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void cleanServiceCallTable() {
+        jdbcTemplate.update("DELETE FROM service_call");
+    }
 
     @Test
     public void testBatchInsert() {
