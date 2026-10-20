@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+"
   workflow_dispatch:
 
 permissions:
@@ -23,8 +24,8 @@ jobs:
       - name: Validate release tag
         shell: bash
         run: |
-          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Release tag must use the stable SemVer format vMAJOR.MINOR.PATCH (for example, v1.2.3)."
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
+            echo "::error::Release tag must use vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-rc.N (for example, v1.2.3-rc.1)."
             exit 1
           fi
 
@@ -73,6 +74,11 @@ jobs:
         run: |
           image_version="${GITHUB_REF_NAME#v}"
           echo "version=${image_version}" >> "${GITHUB_OUTPUT}"
+          if [[ "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "is_stable=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "is_stable=false" >> "${GITHUB_OUTPUT}"
+          fi
 
       - name: Set up Java 21
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
@@ -131,9 +137,9 @@ jobs:
           sbom: false
           tags: |
             prismapm/prism-apm-parser:${{ steps.image_version.outputs.version }}
-            prismapm/prism-apm-parser:latest
+            ${{ steps.image_version.outputs.is_stable == 'true' && 'prismapm/prism-apm-parser:latest' || '' }}
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-parser:${{ steps.image_version.outputs.version }}
-            ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-parser:latest
+            ${{ steps.image_version.outputs.is_stable == 'true' && format('{0}/{1}/prism-apm-parser:latest', vars.ACR_REGISTRY, vars.ACR_NAMESPACE) || '' }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -152,9 +158,9 @@ jobs:
           sbom: false
           tags: |
             prismapm/prism-apm-ui-server:${{ steps.image_version.outputs.version }}
-            prismapm/prism-apm-ui-server:latest
+            ${{ steps.image_version.outputs.is_stable == 'true' && 'prismapm/prism-apm-ui-server:latest' || '' }}
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-ui-server:${{ steps.image_version.outputs.version }}
-            ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-ui-server:latest
+            ${{ steps.image_version.outputs.is_stable == 'true' && format('{0}/{1}/prism-apm-ui-server:latest', vars.ACR_REGISTRY, vars.ACR_NAMESPACE) || '' }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
@@ -173,9 +179,9 @@ jobs:
           sbom: false
           tags: |
             prismapm/prism-apm-ui:${{ steps.image_version.outputs.version }}
-            prismapm/prism-apm-ui:latest
+            ${{ steps.image_version.outputs.is_stable == 'true' && 'prismapm/prism-apm-ui:latest' || '' }}
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-ui:${{ steps.image_version.outputs.version }}
-            ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-ui:latest
+            ${{ steps.image_version.outputs.is_stable == 'true' && format('{0}/{1}/prism-apm-ui:latest', vars.ACR_REGISTRY, vars.ACR_NAMESPACE) || '' }}
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
