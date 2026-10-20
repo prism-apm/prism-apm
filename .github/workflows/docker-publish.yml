@@ -130,8 +130,8 @@ jobs:
           provenance: false
           sbom: false
           tags: |
-            prsimapm/prism-apm-parser:${{ steps.image_version.outputs.version }}
-            prsimapm/prism-apm-parser:latest
+            prismapm/prism-apm-parser:${{ steps.image_version.outputs.version }}
+            prismapm/prism-apm-parser:latest
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-parser:${{ steps.image_version.outputs.version }}
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-parser:latest
           labels: |
@@ -151,8 +151,8 @@ jobs:
           provenance: false
           sbom: false
           tags: |
-            prsimapm/prism-apm-ui-server:${{ steps.image_version.outputs.version }}
-            prsimapm/prism-apm-ui-server:latest
+            prismapm/prism-apm-ui-server:${{ steps.image_version.outputs.version }}
+            prismapm/prism-apm-ui-server:latest
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-ui-server:${{ steps.image_version.outputs.version }}
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-ui-server:latest
           labels: |
@@ -172,8 +172,8 @@ jobs:
           provenance: false
           sbom: false
           tags: |
-            prsimapm/prism-apm-ui:${{ steps.image_version.outputs.version }}
-            prsimapm/prism-apm-ui:latest
+            prismapm/prism-apm-ui:${{ steps.image_version.outputs.version }}
+            prismapm/prism-apm-ui:latest
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-ui:${{ steps.image_version.outputs.version }}
             ${{ vars.ACR_REGISTRY }}/${{ vars.ACR_NAMESPACE }}/prism-apm-ui:latest
           labels: |
