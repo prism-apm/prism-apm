@@ -1,5 +1,7 @@
 # Development
 
+This document defines the development, testing, release, and version maintenance processes for this project.
+
 This project follows a **mainline development + release branch** model:
 
 ```text
@@ -83,6 +85,10 @@ A change should normally be merged into `main` only when:
 3. Code review is complete.
 4. Existing functionality is not broken.
 5. The change is acceptable for inclusion in the next release.
+
+Unfinished user-visible features should normally not be merged directly into `main`.
+
+If a large feature must be merged early, it should use a Feature Flag or be marked as Experimental and disabled by default.
 
 ---
 
@@ -247,7 +253,11 @@ The release branch should not be used as a place to arbitrarily select finished 
 
 ## Incomplete or Experimental Features
 
-Large features sometimes need to be merged before they are ready for normal production use.
+Some large features have long development cycles.
+
+To avoid maintaining a long-lived Feature branch that diverges increasingly from `main`, its code may sometimes need to be merged early.
+
+In that situation, the feature itself should not be exposed as a normal production feature.
 
 Possible mechanisms include:
 
@@ -293,6 +303,8 @@ Code included in release
         ≠
 Feature enabled for users
 ```
+
+Enable Feature C only after it becomes stable.
 
 ---
 
@@ -473,12 +485,14 @@ After branching:
 ```text
 main
     → next minor version development
+    → for example, 1.4.0-SNAPSHOT
 
 release/v1.3.x
     → release stabilization
     → RC
     → v1.3.0
-    → patch maintenance
+    → v1.3.1
+    → v1.3.2
 ```
 
 ---
@@ -526,6 +540,8 @@ release/v1.3.x
        ├── testing
        └── v1.3.0
 ```
+
+An RC should be built from the same Release branch that will be used for the final stable release.
 
 Once the RC phase begins, the release branch should be considered frozen.
 
@@ -590,8 +606,8 @@ Release branches are for:
 
 ```text
 Release stabilization
+Release preparation
 Patch maintenance
-Release-related fixes
 ```
 
 Normally allowed:
@@ -610,6 +626,8 @@ Normally avoid:
 * Unrelated cleanup
 * Breaking API changes
 * Unrelated experimental work
+
+These restrictions reduce the differences between RCs and lower release risk.
 
 ---
 
@@ -635,11 +653,19 @@ For example:
 
 ```text
 v1.3.0 → initial stable release
+
 v1.3.1 → bug fixes
+
 v1.3.2 → bug fixes
 ```
 
-Avoid adding new public features or incompatible API changes in a patch release.
+Avoid the following in a Patch release:
+
+```text
+Adding new public features
+Changing public APIs
+Introducing incompatible changes
+```
 
 ---
 
@@ -700,6 +726,8 @@ A──B──C──────F'
 
 The fix enters `main` first so future releases contain it automatically.
 
+Afterward, selectively Backport the required fixes to older maintenance branches.
+
 The complete release branch should normally **not** be merged back into `main`.
 
 ---
@@ -727,7 +755,7 @@ git switch release/v1.3.x
 git cherry-pick <commit>
 ```
 
-It may also be implemented using a Backport Pull Request:
+On GitHub or Gitee, it may also be implemented using a Backport Pull Request:
 
 ```text
 PR #100
@@ -803,6 +831,8 @@ Backport when necessary
 Supported release branches
 ```
 
+When there is an explicit reason to do so, the fix may instead be made in the oldest affected version first and then Forward Ported.
+
 ---
 
 ## Multiple Supported Releases
@@ -858,6 +888,16 @@ Only supported release lines need to receive the Backport.
 The project may be published to both GitHub and Gitee.
 
 The important branches and release tags should remain consistent:
+
+Every stable release should synchronize at least:
+
+```text
+main
+release/vX.Y.x
+vX.Y.Z tag
+```
+
+For example:
 
 ```text
 GitHub
@@ -935,6 +975,8 @@ This ensures that released artifacts correspond exactly to the source code ident
 
 ## Full Development Lifecycle
 
+The complete lifecycle can be summarized as follows:
+
 ```text
 Issue / Requirement
         │
@@ -985,7 +1027,7 @@ Meanwhile:
 ```text
 main
  │
- └── continues toward 1.4.0-SNAPSHOT
+ └── continues toward 1.4.0
 ```
 
 ---
@@ -1069,4 +1111,223 @@ release/v1.3.x
    └── v1.3.1
 ```
 
-This keeps development, release stabilization, and maintenance clearly separated.
+This approach clearly separates:
+
+```text
+Normal development
+Release stabilization
+Maintenance of older versions
+```
+
+These are three different types of work.
+
+---
+
+# Concrete Procedure for Creating a Release Branch
+
+This section uses the preparation of `0.1.0` as an example to describe the concrete procedure for creating a Release maintenance branch from `main`, preparing an RC, publishing a stable release, and updating the development version on `main`.
+
+The commands below assume the following names and versions:
+
+```text
+GitHub remote: github
+Current development version: 0.1.0-SNAPSHOT
+Release maintenance branch: release/v0.1.x
+First RC branch: release/v0.1.0-RC1
+Stable Release branch: release/v0.1.0
+Stable Release tag: v0.1.0
+Next development version: 0.2.0-SNAPSHOT
+```
+
+If the local GitHub remote is not named `github`, replace `github` in the commands with the actual remote name. Use the following command to check it:
+
+```bash
+git remote -v
+```
+
+## Pre-release Checks
+
+Before starting, verify that the working tree is clean and update the local `main` branch to the latest state on GitHub:
+
+```bash
+git status --short
+
+git fetch github --prune
+git switch main
+git pull --ff-only github main
+```
+
+If `git status --short` produces any output, commit or stash those changes before creating the Release branch. Do not create a Release branch with uncommitted changes in the working tree.
+
+## Create the Release Maintenance Branch
+
+Create the branch that will maintain the entire `0.1` release line from the latest `main`:
+
+```bash
+git switch -c release/v0.1.x
+git push -u github release/v0.1.x
+```
+
+The `release/v0.1.x` branch maintains `0.1.0`, `0.1.1`, `0.1.2`, and all other releases in the `0.1` line. During each stable release, the release script also creates a version-specific branch and tag:
+
+```text
+release/v0.1.x
+       │
+       ├── release/v0.1.0 ── tag v0.1.0
+       ├── release/v0.1.1 ── tag v0.1.1
+       └── release/v0.1.2 ── tag v0.1.2
+```
+
+The version-specific branch preserves the branch state for that stable release. The tag is the exact, immutable identifier of the released version. Subsequent Patch fixes still start from `release/v0.1.x`.
+
+## Update the Development Version on `main`
+
+After the Release maintenance branch has been created, `main` can move to development of the next Minor version. Update the version on a separate branch and merge it into `main` through a Pull Request:
+
+```bash
+git switch main
+git switch -c chore/upgrade-version-to-0.2.0
+
+./scripts/release/set-version.sh 0.2.0-SNAPSHOT
+
+git diff --check
+git add -u
+git commit -m "chore: bump version to 0.2.0-SNAPSHOT"
+git push -u github chore/upgrade-version-to-0.2.0
+```
+
+The Maven development-version suffix must be uppercase `SNAPSHOT`. The script maps the Maven version `0.2.0-SNAPSHOT` to `0.2.0-dev` for `prism-apm-ui`.
+
+After pushing the branch, open a Pull Request. Merge it into `main` only after CI and Code Review pass.
+
+This step can run in parallel with RC preparation and testing on the `release/v0.1.x` line.
+
+## Create an RC Branch
+
+Create the RC branch from the Release maintenance branch. Use a hyphen (`-`) rather than an underscore (`_`) in the branch name:
+
+```bash
+git switch release/v0.1.x
+git pull --ff-only github release/v0.1.x
+git switch -c release/v0.1.0-RC1
+
+./scripts/release/set-version.sh 0.1.0-RC1
+
+git diff --check
+git add -u
+git commit -m "chore(release): prepare 0.1.0-RC1"
+git push -u github release/v0.1.0-RC1
+```
+
+Run the complete Release test suite against this RC branch. If a problem is found, fix it on the RC branch and repeat the tests.
+
+If another RC is required, create its branch from the commit that contains the fixes from the previous RC, then update the version:
+
+```bash
+git switch release/v0.1.0-RC1
+git switch -c release/v0.1.0-RC2
+
+./scripts/release/set-version.sh 0.1.0-RC2
+
+git diff --check
+git add -u
+git commit -m "chore(release): prepare 0.1.0-RC2"
+git push -u github release/v0.1.0-RC2
+```
+
+The current Docker image publishing workflow accepts only stable tags in the `vMAJOR.MINOR.PATCH` format. Pushing an RC branch therefore does not publish stable images to Docker Hub or Alibaba Cloud ACR.
+
+## Confirm the Final RC
+
+Assume that `release/v0.1.0-RC1` is the RC that passed validation. Before publishing the stable release, update the local branch and verify again that the working tree is clean:
+
+```bash
+git fetch github --prune
+git switch release/v0.1.0-RC1
+git pull --ff-only github release/v0.1.0-RC1
+git status --short
+```
+
+`git status --short` should produce no output. Also verify that the following branch and tag names are not already in use:
+
+```bash
+git branch --all --list 'release/v0.1.0' 'remotes/github/release/v0.1.0'
+git tag --list v0.1.0
+```
+
+These two commands should also produce no output. Then complete the final round of Release validation against this exact RC commit.
+
+## Create the Stable Release Branch, Commit, and Tag
+
+Use `prepare-release-v1.sh` to create the stable Release branch from the validated RC branch:
+
+```bash
+./scripts/release/prepare-release-v1.sh \
+  release/v0.1.0-RC1 \
+  release/v0.1.0 \
+  0.1.0
+```
+
+The script performs the following operations:
+
+```text
+1. Creates release/v0.1.0 from release/v0.1.0-RC1 and switches to it.
+2. Updates the project version to 0.1.0.
+3. Creates the commit: chore(release): prepare v0.1.0.
+4. Creates the annotated tag: v0.1.0.
+```
+
+The source branch must exist locally, and neither the target branch nor the tag may already exist. The script does not build, test, or push anything.
+
+After the script finishes, verify that the version, commit, and tag are correct, then run Release validation again against the final Release commit:
+
+```bash
+git status --short
+git show --stat --decorate HEAD
+git show v0.1.0
+```
+
+`git status --short` should produce no output, and `release/v0.1.0` and `v0.1.0` should identify the same Release commit.
+
+## Update the Release Maintenance Branch
+
+After the stable Release commit passes validation, fast-forward `release/v0.1.x` to that commit. This ensures that subsequent Patch releases continue from the version that was actually published:
+
+```bash
+git switch release/v0.1.x
+git pull --ff-only github release/v0.1.x
+git merge --ff-only release/v0.1.0
+```
+
+If the fast-forward is not possible, the Release maintenance branch and the final RC have diverged. Do not overwrite history. First merge the missing changes through a Pull Request, complete Code Review, CI, and Release validation, and only then continue the release.
+
+## Push to GitHub
+
+Push the Release maintenance branch, stable Release branch, and tag only after final validation succeeds. Push the tag last so that it triggers the stable-release workflow:
+
+```bash
+git push -u github release/v0.1.0
+git push github release/v0.1.x
+git push github v0.1.0
+```
+
+After the `v0.1.0` tag is pushed, the Docker image publishing workflow in GitHub Actions first runs the tests, then builds the images and pushes them to Docker Hub and Alibaba Cloud ACR.
+
+If testing or publishing fails, do not move or overwrite a tag that has already been published. Fix the problem, repeat validation, and create a new version appropriate to the nature of the issue.
+
+## Synchronize to Gitee
+
+After the GitHub release and validation complete, synchronize the same Release branches and tag to Gitee. Do not create an independent history on Gitee:
+
+```bash
+git push gitee release/v0.1.x
+git push gitee release/v0.1.0
+git push gitee v0.1.0
+```
+
+After synchronization, confirm that both public repositories contain the same references:
+
+```bash
+git ls-remote github refs/heads/release/v0.1.x refs/heads/release/v0.1.0 refs/tags/v0.1.0
+git ls-remote gitee refs/heads/release/v0.1.x refs/heads/release/v0.1.0 refs/tags/v0.1.0
+```

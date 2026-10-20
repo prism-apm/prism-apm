@@ -12,6 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,13 +36,18 @@ class AdminUserServiceTest {
     @Mock
     private UserMapper userMapper;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void addUser_Success() {
         // Arrange: prepare a User object,
  // and mock findByUsername returning null (username is unique)
         User user = new User();
         user.setUsername("testuser");
+        user.setPassword("plain-password");
         when(userMapper.findByUsername("testuser")).thenReturn(null);
+        when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
         when(userMapper.insert(any(User.class))).thenReturn(1);
 
         // Act
@@ -51,7 +57,9 @@ class AdminUserServiceTest {
 // and findByUsername and insert method are called
         assertTrue(result);
         verify(userMapper).findByUsername("testuser");
+        verify(passwordEncoder).encode("plain-password");
         verify(userMapper).insert(user);
+        assertEquals("encoded-password", user.getPassword());
     }
 
     @Test
@@ -81,7 +89,9 @@ class AdminUserServiceTest {
 // but database insert failure
         User user = new User();
         user.setUsername("testuser");
+        user.setPassword("plain-password");
         when(userMapper.findByUsername("testuser")).thenReturn(null);
+        when(passwordEncoder.encode("plain-password")).thenReturn("encoded-password");
         when(userMapper.insert(any(User.class))).thenReturn(0);
 
         // Act
@@ -90,7 +100,9 @@ class AdminUserServiceTest {
         // Assert: Verify the return value false
         assertFalse(result);
         verify(userMapper).findByUsername("testuser");
+        verify(passwordEncoder).encode("plain-password");
         verify(userMapper).insert(user);
+        assertEquals("encoded-password", user.getPassword());
     }
 
     @Test
@@ -265,4 +277,4 @@ class AdminUserServiceTest {
         assertEquals(1, capturedPage.getCurrent());
         assertEquals(10, capturedPage.getSize());
     }
-} 
+}
