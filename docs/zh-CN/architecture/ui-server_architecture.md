@@ -264,7 +264,7 @@ prism-apm-ui-server/src/main/resources/application.properties
 | `apm.schedule.prewarm-function` | `prewarm_data` | 调用的数据库函数。 |
 | `apm.schedule.prewarm-cron` | `* 0/10 * * * ?` | 任务 Cron 表达式。 |
 
-数据库对象和初始数据由 `sql/` 目录维护。详细初始化、构建和启动步骤见 [配置](configuration.md)、[开发](development.md) 和 [部署](deployment.md)。
+数据库对象和初始数据由 `sql/` 目录维护。详细初始化、构建和启动步骤见 [Parser 配置](../configuration/parser_configuration.md)、[UI Server 配置](../configuration/ui-server_configuration.md)、[开发](../development.md) 和 [部署](../deployment.md)。
 
 # 扩展指南
 

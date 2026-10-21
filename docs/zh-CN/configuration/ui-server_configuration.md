@@ -9,7 +9,7 @@ modified: 2026-08-03 14:51:11
 
 如果需要理解 UI Server 的职责、接口分组和数据访问约定，请参考：
 
-- [UI Server](../UI%20Server.md)
+- [UI Server 架构](../architecture/ui-server_architecture.md)
 
 # 最小必需配置
 

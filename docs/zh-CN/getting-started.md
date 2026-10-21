@@ -34,7 +34,7 @@ modified: 2026-08-12 16:17:21
 ## 克隆代码
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/prism-apm/prism-apm.git
 cd prism-apm
 ```
 

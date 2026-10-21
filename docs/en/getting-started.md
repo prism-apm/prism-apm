@@ -31,7 +31,7 @@ The current startup scripts build the Java modules and frontend assets on your l
 ## Clone the Code
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/prism-apm/prism-apm.git
 cd prism-apm
 ```
 

@@ -19,7 +19,7 @@ modified: 2026-08-11 15:02:01
 - 根据实际接入数据增加或修改自定义规则。
 
 
-关于 `Parser` 的处理逻辑请参看 [Parser 架构](../features/parser_feature.md)。
+关于 `Parser` 的处理逻辑请参看 [Parser 架构](../architecture/parser_architecture.md)。
 
 ## 配置文件
 
